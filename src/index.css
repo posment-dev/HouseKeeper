@@ -11,3 +11,69 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+
+/*Task List*/
+
+.task-list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+.task-list-item {
+  padding: 20px;
+  background: white;
+  display: flex;
+}
+
+.task-details {
+  padding-left: 20px;
+  border-left: 1px solid #eee;
+
+  flex: 1;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.task-details p {
+  margin: 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-remove {
+  padding-left: 20px;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  background-image: url('./icons/cancel.svg');
+  background-size: 100% 100%;
+  border: 0;
+  color: black;
+  font-size: 0;
+  vertical-align: middle;
+  cursor: pointer;
+  outline: none;
+}
+
+.task-reset {
+  padding-left: 20px;
+  align-self: center;
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  background-image: url('./icons/reset.svg');
+  background-size: 100% 100%;
+  border: 0;
+  color: black;
+  font-size: 0;
+  vertical-align: middle;
+  cursor: pointer;
+  outline: none;
+}

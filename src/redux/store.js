@@ -73,6 +73,19 @@ export function resetTimeTaskAction (id) {
     }
 }
 
+export function handleResetTask(task, cb = () => {}) {
+    return async (dispatch) => {
+        dispatch(resetTimeTaskAction(task.id));
+        return axios.put(API_URL + '/reset/' + task.id)
+        .then(() => cb() )
+        .catch((err) => {
+            console.log(err);
+            dispatch(updateTaskAction(task));
+            alert('Reseting Task failed. Try again.');
+        })
+    }
+}
+
 export function handleInitialData() {
     return async (dispatch) => {
         return Promise.all([
@@ -99,7 +112,9 @@ function tasks (state = [], action) {
         state[indextoUpdate] = action.task;
         return state;
     case RESET_TIME_TASK :
-        return state
+        let indextoReset = state.findIndex(task => task.id === action.id);
+        state[indextoReset].last_reset = new Date();
+        return state;
     default :
         return state;
     }
