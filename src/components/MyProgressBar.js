@@ -7,10 +7,14 @@ import {ProgressBar} from 'react-step-progress-bar'
 import PropTypes from 'prop-types';
 
 const MyProgressBar = (props) => {
+  
+  const { task } = props;
 
-  const { maxDays, daysSinceReset } = props;
-
-  const percentage = Math.min(100 * daysSinceReset / maxDays, 100);
+  const now = new Date();
+  const lReset = new Date(task.last_reset);
+  // const daysSince = (now.getTime() - lReset.getTime()) / (1000 * 3600 * 24);
+  const daysSince = (now.getTime() - lReset.getTime()) / (1000 * 60);
+  const percentage = Math.min(100 * daysSince / task.days_repeat, 100);
 
   return (
     <ProgressBar
@@ -21,8 +25,7 @@ const MyProgressBar = (props) => {
 }
 
 MyProgressBar.propTypes = {
-    maxDays: PropTypes.number,
-    currentDays: PropTypes.number,
+    task: PropTypes.object
 };
 
 export default MyProgressBar;

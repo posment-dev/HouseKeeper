@@ -108,13 +108,23 @@ function tasks (state = [], action) {
     case REMOVE_TASK :
         return state.filter(task => task.id !== action.id);
     case UPDATE_TASK :
-        let indextoUpdate = state.findIndex(task => task.id === action.id);
-        state[indextoUpdate] = action.task;
-        return state;
+        return state.map((task, index) => {
+            if (task.id !== action.task.id) {
+                return task;
+            }
+            return {
+                ...task,
+                ...action.task
+        }});
     case RESET_TIME_TASK :
-        let indextoReset = state.findIndex(task => task.id === action.id);
-        state[indextoReset].last_reset = new Date();
-        return state;
+        return state.map((task, index) => {
+            if (task.id !== action.id) {
+                return task;
+            }
+            return {
+                ...task,
+                last_reset: new Date()
+        }});
     default :
         return state;
     }

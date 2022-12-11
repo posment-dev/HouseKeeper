@@ -42,7 +42,7 @@ const TaskList = (props) => {
                 <div key={task.id}>
                     <Task key={task.id} task={task} loading={loading} />
                     <li key={task.id * -1}>
-                        <MyProgressBar maxDays={task.days_repeat} daysSinceReset={calcDaysSinceReset(task.last_reset)}/>
+                        <MyProgressBar task={task}/>
                     </li>
                 </div>
             ))}
