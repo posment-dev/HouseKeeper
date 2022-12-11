@@ -1,13 +1,27 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App';
+import store, { handleInitialData } from './redux/store';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { StyledEngineProvider } from '@mui/material/styles';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+// Fetch Data from DB, before component renders
+store.dispatch(handleInitialData());
+
+const root = createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Provider store={store}>
+        <StyledEngineProvider injectFirst>
+          <App />
+        </StyledEngineProvider>
+      </Provider>
+    </BrowserRouter>
   </React.StrictMode>
 );
 

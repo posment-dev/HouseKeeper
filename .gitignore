@@ -24,3 +24,7 @@ yarn-error.log*
 
 venv
 __pycache__
+api/ToDos.txt
+api/hacking.py
+ToDos.txt
+hacking.js
