@@ -9,6 +9,7 @@ const SET_TASKS = 'SET_TASKS'
 const REMOVE_TASK = 'REMOVE_TASK'
 const UPDATE_TASK = 'UPDATE_TASK'
 const RESET_TIME_TASK = 'RESET_TIME_TASK'
+const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
 
 export function addTaskAction (task) {
     return {
@@ -86,6 +87,13 @@ export function handleResetTask(task, cb = () => {}) {
     }
 }
 
+export function toggleEditModeAction (id) {
+    return {
+        type: TOGGLE_EDIT_MODE,
+        id,
+    }
+}
+
 export function handleInitialData() {
     return async (dispatch) => {
         return Promise.all([
@@ -124,6 +132,15 @@ function tasks (state = [], action) {
             return {
                 ...task,
                 last_reset: new Date()
+        }});
+    case TOGGLE_EDIT_MODE : 
+        return state.map((task, index) => {
+            if (task.id !== action.id) {
+                return task;
+            }
+            return {
+                ...task,
+                editMode: ! task.editMode
         }});
     default :
         return state;
