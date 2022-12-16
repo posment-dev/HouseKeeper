@@ -1,7 +1,6 @@
 import React from 'react';
 
 import Task from './Task';
-import MyProgressBar from './MyProgressBar';
 import { handleAddTask, handleRemoveTask, handleResetTask } from '../redux/store';
 import { useDispatch } from 'react-redux';
 
