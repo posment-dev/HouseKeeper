@@ -1,0 +1,1 @@
+DB_LOCATION = 'sqlite:///db/tasks.db'

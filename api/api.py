@@ -1,13 +1,12 @@
-import time
-
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy.sql import func
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Task
+from constants import DB_LOCATION
 
 
-engine = create_engine('sqlite:///tasks.db')
+engine = create_engine(DB_LOCATION)
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)

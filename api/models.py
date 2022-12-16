@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from sqlalchemy import create_engine
+from constants import DB_LOCATION
 
 Base = declarative_base()
 
@@ -26,5 +27,5 @@ class Task(Base):
  
 
 
-engine = create_engine('sqlite:///db/tasks.db')
+engine = create_engine(DB_LOCATION)
 Base.metadata.create_all(engine)
