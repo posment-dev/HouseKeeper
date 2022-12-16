@@ -26,5 +26,5 @@ class Task(Base):
  
 
 
-engine = create_engine('sqlite:///tasks.db')
+engine = create_engine('sqlite:///db/tasks.db')
 Base.metadata.create_all(engine)
