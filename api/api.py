@@ -14,9 +14,6 @@ session = DBSession()
 
 app = Flask(__name__)
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0')
-
 @app.route('/api/v1/tasks', methods = ['GET', 'POST'])
 def tasks():
 	if request.method == 'GET':
@@ -54,6 +51,9 @@ def reset_taks(id):
 	if request.method == 'PUT':
 		return _corsify_actual_response(resetTask(id))
 
+# Flask App Config
+#if __name__ == "__main__":
+#    app.run(host='0.0.0.0')
 
 def getAllTasks():
 	tasks = session.query(Task).all()
