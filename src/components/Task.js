@@ -103,9 +103,11 @@ const Task = (props) => {
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative', width: '60%'}} />
 	            <Box sx={{ m: 1, position: 'relative' }}>
-	                <IconButton onClick={() => resetTask()} aria-label="reset">
-	                    <CheckBoxIcon />
-	                </IconButton>
+	                {
+	                	! task.editMode ? (<IconButton onClick={() => resetTask()} aria-label="reset">
+		                    <CheckBoxIcon />
+		                </IconButton>) : ('')
+	            	}
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative' }}>
 	            	{
@@ -119,9 +121,11 @@ const Task = (props) => {
 	            	}
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative' }}>
-	                <IconButton onClick={() => removeTask()} aria-label="delete">
-	                    <DeleteIcon />
-	                </IconButton>
+	            {
+	            	! task.editMode ? (<IconButton onClick={() => removeTask()} aria-label="delete">
+	                    	<DeleteIcon />
+	                	</IconButton>) : ('')
+	            }
 	            </Box>
 	        </Box>
 	        <LinearProgress

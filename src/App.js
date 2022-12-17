@@ -1,8 +1,8 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 import TaskList from './components/TaskList';
+import NavBar from './components/NavBar';
 
 import { Route, Routes } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -16,10 +16,13 @@ function App() {
 
   return (
     <div className="App">
+      <header className="App-header">
+        <NavBar />
+      </header>
       <div className='App-body'>
         <Routes>
           <Route 
-            exact path='/'
+            exact path='/tasks'
             element={
               <Tasks />
             }

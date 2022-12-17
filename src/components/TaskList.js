@@ -9,6 +9,8 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { grey } from '@mui/material/colors';
 
 import PropTypes from 'prop-types';
 
@@ -16,6 +18,14 @@ const TaskList = (props) => {
 
     const { tasks, loading } = props;
     const dispatch = useDispatch();
+
+    const buttonTheme = createTheme({
+      palette: {
+        primary: {
+            main: grey[900],
+        },
+      }
+    });
 
     const getHighestTaskId = () => {
         return Math.max.apply(null, tasks.map(t => t.id));
@@ -42,14 +52,16 @@ const TaskList = (props) => {
                 Task List
             </Typography>
             <Stack sx={{ width: '95%'}} spacing={1}>
-              {tasks.map(task => {
-                return (
-                <Task key={task.id} task={task} loading={loading} />
-                )
-              })}
-              <Button variant="outlined" startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>
-                Add Task
-              </Button>
+                {tasks.map(task => {
+                    return (
+                        <Task key={task.id} task={task} loading={loading} />
+                    )
+                })}
+                <ThemeProvider theme={buttonTheme}>
+                    <Button variant='contained' color='primary' startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>
+                        Add Task
+                    </Button>
+                </ThemeProvider>
             </Stack>
         </Box>
     );
