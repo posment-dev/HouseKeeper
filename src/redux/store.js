@@ -3,8 +3,7 @@ import thunk from 'redux-thunk';
 import axios from 'axios';
 
 //const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
-//const API_URL = 'http://192.168.0.20:5000/api/v1/tasks'
-const API_URL = 'http://192.168.0.27:5000/api/v1/tasks'
+const API_URL = 'http://192.168.0.29:5000/api/v1/tasks'
 
 const ADD_TASK = 'ADD_TASK'
 const SET_TASKS = 'SET_TASKS'
