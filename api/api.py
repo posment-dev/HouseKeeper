@@ -14,6 +14,9 @@ session = DBSession()
 
 app = Flask(__name__)
 
+if __name__ == "__main__":
+    app.run(host='0.0.0.0')
+
 @app.route('/api/v1/tasks', methods = ['GET', 'POST'])
 def tasks():
 	if request.method == 'GET':
