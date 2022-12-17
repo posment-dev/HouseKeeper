@@ -1,13 +1,14 @@
 import React from 'react';
 
 import Task from './Task';
-import { handleAddTask, handleRemoveTask, handleResetTask } from '../redux/store';
+import { handleAddTask } from '../redux/store';
 import { useDispatch } from 'react-redux';
 
-import { styled } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 import PropTypes from 'prop-types';
 
@@ -16,11 +17,17 @@ const TaskList = (props) => {
     const { tasks, loading } = props;
     const dispatch = useDispatch();
 
-    const submitAddTask = (event) => {
-        event.preventDefault();
+    const getHighestTaskId = () => {
+        return Math.max.apply(null, tasks.map(t => t.id));
+    }
+
+    const submitAddTask = () => {
+        let newId = getHighestTaskId() + 1;
         let task = {
-            name: 'newDefaultTask',
+            id: newId,
+            name: 'New Task',
             days_repeat: 10,
+            editMode: true,
         }
         dispatch(handleAddTask(task));
     }
@@ -40,6 +47,9 @@ const TaskList = (props) => {
                 <Task key={task.id} task={task} loading={loading} />
                 )
               })}
+              <Button variant="outlined" startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>
+                Add Task
+              </Button>
             </Stack>
         </Box>
     );

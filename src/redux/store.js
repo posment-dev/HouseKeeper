@@ -8,6 +8,8 @@ const ADD_TASK = 'ADD_TASK'
 const SET_TASKS = 'SET_TASKS'
 const REMOVE_TASK = 'REMOVE_TASK'
 const UPDATE_TASK = 'UPDATE_TASK'
+const UPDATE_NAME = 'UPDATE_NAME'
+const UPDATE_DAYS = 'UPDATE_DAYS'
 const RESET_TIME_TASK = 'RESET_TIME_TASK'
 const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
 
@@ -21,12 +23,12 @@ export function addTaskAction (task) {
 export function handleAddTask(task, cb = () => {}) {
     return (dispatch) => {
         dispatch(addTaskAction(task));
-        return axios.post("http://localhost:5050/task/add", task)
+        return axios.post(API_URL + '?name=' + task.name + '&days_repeat=' + task.days_repeat)
         .then(() => cb() )
         .catch((err) => {
-            console.log(err);
-            dispatch(removeTaskAction(task.id));
-            alert('Add new Task failed. Try again.');
+        console.log(err);
+        dispatch(removeTaskAction(task.id));
+        alert('Add new Task failed. Try again.');
         })
     }
 }
@@ -58,14 +60,64 @@ export function handleRemoveTask(task, cb = () => {}) {
     }
 }
 
-export function updateTaskAction (task) {
+export function updateTaskNameAction (id, name) {
     return {
-        type: UPDATE_TASK,
-        task,
+        type: UPDATE_NAME,
+        id,
+        name,
     }
 }
 
+export function handleUpdateTaskName (id, name, cb = () => {}) {
+    return (dispatch) => {
+        dispatch(updateTaskNameAction(id, name));
+        return () => cb();
+    }
+}
 
+export function updateTaskDaysAction (id, days_repeat) {
+    return {
+        type: UPDATE_DAYS,
+        id,
+        days_repeat,
+    }
+}
+
+export function handleUpdateTaskDays (id, days_repeat, cb = () => {}) {
+    return (dispatch) => {
+        dispatch(updateTaskDaysAction(id, days_repeat));
+        return () => cb();
+    }
+}
+
+export function updateTaskAction (id, name, days_repeat) {
+    return {
+        type: UPDATE_TASK,
+        id,
+        name,
+        days_repeat,
+    }
+}
+
+export function handleUpdateTask (id, name, days_repeat, cb = () => {}) {
+    return async (dispatch) => {
+        dispatch(updateTaskAction(id, name));
+        let urlAdd = '?';
+        if (name) {
+            urlAdd += 'name=' + name + '&';
+        }
+        if (days_repeat) {
+            urlAdd += 'days_repeat=' + days_repeat;
+        }
+        return axios.put(API_URL + '/' + id + urlAdd)
+        .then(() => cb() )
+        .catch((err) => {
+            console.log(err);
+            dispatch(handleInitialData());
+            alert('Updating Task failed. Try again.');
+        })
+    }
+}
 
 export function resetTimeTaskAction (id) {
     return {
@@ -110,22 +162,43 @@ export function handleInitialData() {
 function tasks (state = [], action) {
     switch(action.type) {
     case ADD_TASK :
-        return state.concat([action.task]);
+        return state.concat([{
+            ...action.task,
+            last_reset: new Date(),
+        }]);
     case SET_TASKS :
         return action.tasks;
     case REMOVE_TASK :
         return state.filter(task => task.id !== action.id);
     case UPDATE_TASK :
-        return state.map((task, index) => {
-            if (task.id !== action.task.id) {
+        return state.map((task) => {
+            if (task.id !== action.id) {
                 return task;
             }
             return {
                 ...task,
-                ...action.task
+                name: action.name
+        }});
+    case UPDATE_NAME :
+        return state.map((task) => {
+            if (task.id !== action.id) {
+                return task;
+            }
+            return {
+                ...task,
+                name: action.name
+        }});
+    case UPDATE_DAYS :
+        return state.map((task) => {
+            if (task.id !== action.id) {
+                return task;
+            }
+            return {
+                ...task,
+                days_repeat: action.days_repeat
         }});
     case RESET_TIME_TASK :
-        return state.map((task, index) => {
+        return state.map((task) => {
             if (task.id !== action.id) {
                 return task;
             }
@@ -134,7 +207,7 @@ function tasks (state = [], action) {
                 last_reset: new Date()
         }});
     case TOGGLE_EDIT_MODE : 
-        return state.map((task, index) => {
+        return state.map((task) => {
             if (task.id !== action.id) {
                 return task;
             }

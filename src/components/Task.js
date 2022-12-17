@@ -6,12 +6,12 @@ import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import Typography from '@mui/material/Typography';
+import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 
-import InputField from './InputField';
-import { handleRemoveTask, handleResetTask, toggleEditModeAction} from '../redux/store';
+import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays} from '../redux/store';
 import { useDispatch } from 'react-redux';
 
 const Task = (props) => {
@@ -20,21 +20,29 @@ const Task = (props) => {
 	const { task, loading } = props;
     const dispatch = useDispatch();
 
-    const removeTask = task => {
+    const removeTask = () => {
         dispatch(handleRemoveTask(task));
     }
 
-    const resetTask = task => {
+    const resetTask = () => {
         dispatch(handleResetTask(task));
     }
 
-    const toggleEditMode = (id) => {
-        dispatch(toggleEditModeAction(id));
+    const toggleEditMode = () => {
+        dispatch(toggleEditModeAction(task.id));
     }
 
-    const updateTask = task => {
-    	toggleEditMode(task.id);
-        dispatch(handleResetTask(task));
+    const handleSaveTask = () => {
+    	dispatch(handleUpdateTask(task.id, task.name, task.days_repeat));
+    	toggleEditMode();
+    }
+
+    const handleChangeName = (name) => {
+    	dispatch(handleUpdateTaskName(task.id, name));
+    }
+
+    const handleChangeDays = (days_repeat) => {
+    	dispatch(handleUpdateTaskDays(task.id, days_repeat));	
     }
 
     const calcProgress = (last_reset, days_repeat) => {
@@ -64,11 +72,15 @@ const Task = (props) => {
 	        <Box sx={{ display: 'flex', alignItems: 'flex-end'}}>
 	            <Box sx={{ m: 1, position: 'relative', width: '20%'}}>    
 	                {
-	                	task.editMode ? (<InputField
-			                            name='name'
-			                            type='text'
-			                            defaultValue={task.name}
-		                />) : (<Typography variant='h4' component='div'>
+	                	task.editMode ? (<TextField
+								            label='Task Name'
+											onChange={(event) => handleChangeName(event.target.value)}
+											name='name'
+											type='text'
+											defaultValue={task.name}
+											variant='outlined'
+											color='primary'
+						/>) : (<Typography variant='h4' component='div'>
 				                    {task.name}
 				                </Typography>
 				        )
@@ -76,11 +88,14 @@ const Task = (props) => {
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative', width: '15%'}}>
 	                {
-	                	task.editMode ? (<InputField
-					                	name='interval'
-			                            type='number'
-			                            defaultValue={task.days_repeat}
-			                            label="repeat interval (days):"
+	                	task.editMode ? (<TextField
+								            label="repeat interval (days):"
+											onChange={(event) => handleChangeDays(event.target.value)}
+											name='interval'
+											type='number'
+											defaultValue={task.days_repeat}
+											variant='outlined'
+											color='primary'
 		                />) : (<Typography variant='body1' component='div'>
 				                    repeat interval (days): {task.days_repeat}
 				                </Typography>)
@@ -88,30 +103,30 @@ const Task = (props) => {
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative', width: '60%'}} />
 	            <Box sx={{ m: 1, position: 'relative' }}>
-	                <IconButton onClick={() => resetTask(task)} aria-label="reset">
+	                <IconButton onClick={() => resetTask()} aria-label="reset">
 	                    <CheckBoxIcon />
 	                </IconButton>
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative' }}>
 	            	{
-	            		task.editMode ? (<IconButton onClick={() => updateTask(task)} aria-label="save">
+	            		task.editMode ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
 				                    <SaveIcon />
 				                </IconButton>
-	            		) : (<IconButton onClick={() => toggleEditMode(task.id)} aria-label="edit">
+	            		) : (<IconButton onClick={() => toggleEditMode()} aria-label="edit">
 			                    <EditIcon />
 			                </IconButton>
 	            		)
 	            	}
 	            </Box>
 	            <Box sx={{ m: 1, position: 'relative' }}>
-	                <IconButton onClick={() => removeTask(task)} aria-label="delete">
+	                <IconButton onClick={() => removeTask()} aria-label="delete">
 	                    <DeleteIcon />
 	                </IconButton>
 	            </Box>
 	        </Box>
 	        <LinearProgress
 	            key={task.id}
-	            color={calcProgress(task.last_reset, task.days_repeat) < 75 ? 'primary' : 'secondary'}
+	            color={calcProgress(task.last_reset, task.days_repeat) < 80 ? 'primary' : 'secondary'}
 	            sx={{
 	                '& .MuiLinearProgress-barColorPrimary': {
 	                    bgcolor: "green",
@@ -121,6 +136,7 @@ const Task = (props) => {
 	                    opacity: 0.6,
 	                },
 	                height: 10,
+	                borderRadius: 2,
 	            }}
 	            variant='determinate'
 	            value={calcProgress(task.last_reset, task.days_repeat)}
