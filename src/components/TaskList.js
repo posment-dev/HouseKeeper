@@ -48,6 +48,7 @@ const TaskList = (props) => {
             editMode: true,
         }
         dispatch(handleAddTask(task));
+        dispatch(sortTaskListAction(sortBy));
     }
 
     const handleSortByChange = (sortByEvent) => {
@@ -87,7 +88,6 @@ const TaskList = (props) => {
                                 label='SortBy'
                                 onChange={(event) => handleSortByChange(event.target.value)}
                             >
-                                <MenuItem value=''><em>unsorted</em></MenuItem>
                                 {
                                     Object.values(SortByEnum).map(value => {
                                         return (
@@ -103,7 +103,7 @@ const TaskList = (props) => {
             <Stack sx={{ width: '95%'}} spacing={1}>
                 {tasks.map(task => {
                     return (
-                        <Task key={task.id} task={task} loading={loading} />
+                        <Task key={task.id} task={task} sortBy={sortBy} loading={loading} />
                     )
                 })}
                 <ThemeProvider theme={buttonTheme}>

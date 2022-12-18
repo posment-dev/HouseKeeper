@@ -12,14 +12,14 @@ import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 
-import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays} from '../redux/store';
+import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays, sortTaskListAction} from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { calcProgress } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
 
-	const { task, loading } = props;
+	const { task, sortBy, loading } = props;
     const dispatch = useDispatch();
 
     const removeTask = () => {
@@ -28,6 +28,7 @@ const Task = (props) => {
 
     const resetTask = () => {
         dispatch(handleResetTask(task));
+        dispatch(sortTaskListAction(sortBy));
     }
 
     const toggleEditMode = () => {
@@ -37,6 +38,7 @@ const Task = (props) => {
     const handleSaveTask = () => {
     	dispatch(handleUpdateTask(task.id, task.name, task.days_repeat));
     	toggleEditMode();
+    	dispatch(sortTaskListAction(sortBy));
     }
 
     const handleChangeName = (name) => {
@@ -120,7 +122,7 @@ const Task = (props) => {
 	        </Grid>
 	        <LinearProgress
 	            key={task.id}
-	            color={calcProgress(task.last_reset, task.days_repeat) < 90 ? 'primary' : 'secondary'}
+	            color={calcProgress(task.last_reset, task.days_repeat) < 85 ? 'primary' : 'secondary'}
 	            sx={{
 	                '& .MuiLinearProgress-barColorPrimary': {
 	                    bgcolor: "green",

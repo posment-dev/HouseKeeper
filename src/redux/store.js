@@ -185,11 +185,11 @@ export function handleInitialData() {
 
 
 function compareTaskByDate (a,b) {
-  if ( (1 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat < (1 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
-    return 1;
-  }
-  if ( (1 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat > (1 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+  if ( (100 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat < (100 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
     return -1;
+  }
+  if ( (100 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat > (100 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+    return 1;
   }
   return 0;
 }
@@ -278,7 +278,7 @@ function tasks (state = [], action) {
     }
 }
 
-function sortBy (state = '', action) {
+function sortBy (state = SortByEnum.Name, action) {
     switch (action.type) {
         case UPDATE_SORTBY :
             return action.sortByValue;
