@@ -5,9 +5,9 @@ echo "Building app..."
 npm run build
 
 echo "Deploying files to server..."
-scp -r build/* rim@192.168.0.26:/var/www/HouseKeeper/
+scp -r build/* rim@192.168.0.201:/var/www/HouseKeeper/
 
 echo "Deploying backend files to server"
-scp -r api/{api,models,constants}.py api/requirements.txt api/.flaskenv rim@192.168.0.29:~/HouseKeeperApi/ 
+scp -r api/{api,models,constants}.py api/requirements.txt api/.flaskenv rim@192.168.0.221:~/HouseKeeperApi/ 
 
 echo "Done!"
