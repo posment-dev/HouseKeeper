@@ -7,6 +7,8 @@ import { calcProgress } from '../Constants/StaticFunctions';
 //const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
 const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
 
+const SORTING_DEFAULT = SortByEnum.Name
+
 const ADD_TASK = 'ADD_TASK'
 const SET_TASKS = 'SET_TASKS'
 const REMOVE_TASK = 'REMOVE_TASK'
@@ -179,6 +181,7 @@ export function handleInitialData() {
         ]).then(([tasks]) => {
             console.log(tasks);
             dispatch(setTasksAction(tasks.data.Tasks));
+            dispatch(sortTaskListAction(SORTING_DEFAULT));
         })
     }
 }
@@ -278,7 +281,7 @@ function tasks (state = [], action) {
     }
 }
 
-function sortBy (state = SortByEnum.Name, action) {
+function sortBy (state = SORTING_DEFAULT, action) {
     switch (action.type) {
         case UPDATE_SORTBY :
             return action.sortByValue;
