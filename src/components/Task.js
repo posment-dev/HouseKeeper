@@ -64,17 +64,19 @@ const Task = (props) => {
 	        }}
 	    >
 	        <Grid container spacing={2}>
-	            <Grid item  xs={6} md={6} sx={{marginTop:1, marginBottom:1}}>    
+	        	<Grid item xs={1} />
+	            <Grid item xs={6}>    
 	                {
 	                	task.editMode ? (<TextField
 								            label='Task Name'
 											onChange={(event) => handleChangeName(event.target.value)}
 											name='name'
 											type='text'
+											margin='normal'
 											defaultValue={task.name}
 											variant='outlined'
 											color='primary'
-						/>) : (<Typography variant='h6' component='div'>
+						/>) : (<Typography variant='h7' component='div'>
 				                    {task.name}
 				                </Typography>
 				        )
@@ -85,15 +87,16 @@ const Task = (props) => {
 											onChange={(event) => handleChangeDays(event.target.value)}
 											name='interval'
 											type='number'
+											margin='normal'
 											defaultValue={task.days_repeat}
 											variant='outlined'
 											color='primary'
-		                />) : (<Typography variant='body1' component='div'>
+		                />) : (<Typography variant='body2' component='div'>
 				                    repeat interval (days): {task.days_repeat}
 				                </Typography>)
 	                }
 	            </Grid>
-	            <Grid item xs={6} md={6} container justifyContent='flex-end'>
+	            <Grid item xs={5} container justifyContent='flex-end'>
 	                {
 	                	! task.editMode ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />
