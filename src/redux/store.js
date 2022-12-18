@@ -1,6 +1,8 @@
 import { createStore, combineReducers, applyMiddleware} from 'redux';
 import thunk from 'redux-thunk';
 import axios from 'axios';
+import { SortByEnum } from '../Constants/Enums'
+import { calcProgress } from '../Constants/StaticFunctions';
 
 //const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
 const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
@@ -11,8 +13,11 @@ const REMOVE_TASK = 'REMOVE_TASK'
 const UPDATE_TASK = 'UPDATE_TASK'
 const UPDATE_NAME = 'UPDATE_NAME'
 const UPDATE_DAYS = 'UPDATE_DAYS'
+const UPDATE_PROGRESS = 'UPDATE_PROGRESS'
 const RESET_TIME_TASK = 'RESET_TIME_TASK'
 const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
+const SORT_TASK_LIST = 'SORT_TASK_LIST'
+const UPDATE_SORTBY = 'UPDATE_SORTBY'
 
 export function addTaskAction (task) {
     return {
@@ -140,10 +145,30 @@ export function handleResetTask(task, cb = () => {}) {
     }
 }
 
+export function updateProgressAction () {
+    return {
+        type: UPDATE_PROGRESS,
+    }
+}
+
 export function toggleEditModeAction (id) {
     return {
         type: TOGGLE_EDIT_MODE,
         id,
+    }
+}
+
+export function sortTaskListAction (sortByValue) {
+    return {
+        type: SORT_TASK_LIST,
+        sortByValue,
+    }
+}
+
+export function updateSortByAction (sortByValue) {
+    return {
+        type: UPDATE_SORTBY,
+        sortByValue,
     }
 }
 
@@ -158,6 +183,28 @@ export function handleInitialData() {
     }
 }
 
+
+function compareTaskByDate (a,b) {
+  if ( (1 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat < (1 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+    return 1;
+  }
+  if ( (1 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat > (1 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+    return -1;
+  }
+  return 0;
+}
+
+function compareTaskByName (a,b) {
+    let nameA = a.name.toLowerCase(),
+      nameB = b.name.toLowerCase()
+    if ( nameA < nameB ){
+        return -1;
+    }
+    if ( nameA > nameB ){
+        return 1;
+    }
+        return 0;
+}
 
 //recuders
 function tasks (state = [], action) {
@@ -207,6 +254,8 @@ function tasks (state = [], action) {
                 ...task,
                 last_reset: new Date()
         }});
+    case UPDATE_PROGRESS :
+        return state;
     case TOGGLE_EDIT_MODE : 
         return state.map((task) => {
             if (task.id !== action.id) {
@@ -216,8 +265,25 @@ function tasks (state = [], action) {
                 ...task,
                 editMode: ! task.editMode
         }});
+    case SORT_TASK_LIST :
+        if (action.sortByValue === SortByEnum.NextEnding) {
+            return state.slice().sort(compareTaskByDate);
+        }
+        if (action.sortByValue === SortByEnum.Name) {
+            return state.slice().sort(compareTaskByName);
+        }
+        return state;
     default :
         return state;
+    }
+}
+
+function sortBy (state = '', action) {
+    switch (action.type) {
+        case UPDATE_SORTBY :
+            return action.sortByValue;
+        default :
+            return state;
     }
 }
 
@@ -246,6 +312,7 @@ const logger = (store) => (next) => (action) => {
 
 const store = createStore(combineReducers({
     tasks,
+    sortBy,
     loading,
 }), applyMiddleware(thunk, checker, logger))
 

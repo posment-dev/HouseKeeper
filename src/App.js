@@ -11,6 +11,7 @@ function App() {
 
   const Tasks = connect((state) => ({
     tasks: state.tasks,
+    sortBy: state.sortBy,
     loading: state.loading,
   }))(TaskList);
 

@@ -14,6 +14,7 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays} from '../redux/store';
 import { useDispatch } from 'react-redux';
+import { calcProgress } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
@@ -44,14 +45,6 @@ const Task = (props) => {
 
     const handleChangeDays = (days_repeat) => {
     	dispatch(handleUpdateTaskDays(task.id, days_repeat));	
-    }
-
-    const calcProgress = (last_reset, days_repeat) => {
-        const now = new Date();
-        const lReset = new Date(last_reset);
-        // const daysSince = (now.getTime() - lReset.getTime()) / (1000 * 3600 * 24);
-        const daysSince = (now.getTime() - lReset.getTime()) / (1000 * 60);
-        return Math.min(100 * daysSince / days_repeat, 100);
     }
 
     if (loading === true) {
