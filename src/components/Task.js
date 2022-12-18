@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types'
 
 import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
@@ -69,8 +70,8 @@ const Task = (props) => {
 	            },
 	        }}
 	    >
-	        <Box sx={{ display: 'flex', alignItems: 'flex-end'}}>
-	            <Box sx={{ m: 1, position: 'relative', width: '20%'}}>    
+	        <Grid container spacing={2}>
+	            <Grid item  xs={5} md={4} sx={{marginTop:1, marginBottom:1}}>    
 	                {
 	                	task.editMode ? (<TextField
 								            label='Task Name'
@@ -80,13 +81,13 @@ const Task = (props) => {
 											defaultValue={task.name}
 											variant='outlined'
 											color='primary'
-						/>) : (<Typography variant='h4' component='div'>
+						/>) : (<Typography variant='h6' component='div'>
 				                    {task.name}
 				                </Typography>
 				        )
 	                }
-	            </Box>
-	            <Box sx={{ m: 1, position: 'relative', width: '15%'}}>
+	            </Grid>
+	            <Grid item xs={3} md={2} sx={{marginTop:1, marginBottom:1}}>
 	                {
 	                	task.editMode ? (<TextField
 								            label="repeat interval (days):"
@@ -100,16 +101,13 @@ const Task = (props) => {
 				                    repeat interval (days): {task.days_repeat}
 				                </Typography>)
 	                }
-	            </Box>
-	            <Box sx={{ m: 1, position: 'relative', width: '60%'}} />
-	            <Box sx={{ m: 1, position: 'relative' }}>
+	            </Grid>
+	            <Grid item xs={4} md={6} container justifyContent='flex-end'>
 	                {
 	                	! task.editMode ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />
 		                </IconButton>) : ('')
 	            	}
-	            </Box>
-	            <Box sx={{ m: 1, position: 'relative' }}>
 	            	{
 	            		task.editMode ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
 				                    <SaveIcon />
@@ -119,18 +117,16 @@ const Task = (props) => {
 			                </IconButton>
 	            		)
 	            	}
-	            </Box>
-	            <Box sx={{ m: 1, position: 'relative' }}>
-	            {
-	            	! task.editMode ? (<IconButton onClick={() => removeTask()} aria-label="delete">
+	            	{
+	            		! task.editMode ? (<IconButton onClick={() => removeTask()} aria-label="delete">
 	                    	<DeleteIcon />
 	                	</IconButton>) : ('')
-	            }
-	            </Box>
-	        </Box>
+	            	}
+	            </Grid>
+	        </Grid>
 	        <LinearProgress
 	            key={task.id}
-	            color={calcProgress(task.last_reset, task.days_repeat) < 80 ? 'primary' : 'secondary'}
+	            color={calcProgress(task.last_reset, task.days_repeat) < 90 ? 'primary' : 'secondary'}
 	            sx={{
 	                '& .MuiLinearProgress-barColorPrimary': {
 	                    bgcolor: "green",
