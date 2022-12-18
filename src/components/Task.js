@@ -71,7 +71,7 @@ const Task = (props) => {
 	        }}
 	    >
 	        <Grid container spacing={2}>
-	            <Grid item  xs={5} md={4} sx={{marginTop:1, marginBottom:1}}>    
+	            <Grid item  xs={8} md={6} sx={{marginTop:1, marginBottom:1}}>    
 	                {
 	                	task.editMode ? (<TextField
 								            label='Task Name'
@@ -86,8 +86,6 @@ const Task = (props) => {
 				                </Typography>
 				        )
 	                }
-	            </Grid>
-	            <Grid item xs={3} md={2} sx={{marginTop:1, marginBottom:1}}>
 	                {
 	                	task.editMode ? (<TextField
 								            label="repeat interval (days):"
