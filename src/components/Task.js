@@ -64,7 +64,7 @@ const Task = (props) => {
 	        }}
 	    >
 	        <Grid container spacing={2}>
-	            <Grid item  xs={8} md={6} sx={{marginTop:1, marginBottom:1}}>    
+	            <Grid item  xs={6} md={6} sx={{marginTop:1, marginBottom:1}}>    
 	                {
 	                	task.editMode ? (<TextField
 								            label='Task Name'
@@ -93,7 +93,7 @@ const Task = (props) => {
 				                </Typography>)
 	                }
 	            </Grid>
-	            <Grid item xs={4} md={6} container justifyContent='flex-end'>
+	            <Grid item xs={6} md={6} container justifyContent='flex-end'>
 	                {
 	                	! task.editMode ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />
