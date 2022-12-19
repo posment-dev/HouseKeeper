@@ -29,3 +29,4 @@ api/hacking.py
 ToDos.txt
 hacking.js
 api/db/*
+deploy.sh

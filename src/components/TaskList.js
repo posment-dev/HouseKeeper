@@ -1,7 +1,8 @@
 import React from 'react';
 
 import Task from './Task';
-import { handleAddTask, sortTaskListAction, updateSortByAction, updateProgressAction } from '../redux/store';
+import Search from './Search';
+import { handleAddTask, handleUpdateSort, handleUpdateFilter, refreshSortTasksAction } from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { SortByEnum } from '../Constants/Enums'
 
@@ -10,8 +11,8 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
-import IconButton from '@mui/material/IconButton';
-import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
+//import IconButton from '@mui/material/IconButton';
+//import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { grey } from '@mui/material/colors';
@@ -24,7 +25,7 @@ import PropTypes from 'prop-types';
 
 const TaskList = (props) => {
 
-    const { tasks, sortBy, loading } = props;
+    const { tasks, sortBy, filter, loading } = props;
     const dispatch = useDispatch();
 
     const buttonTheme = createTheme({
@@ -48,19 +49,22 @@ const TaskList = (props) => {
             editMode: true,
         }
         dispatch(handleAddTask(task));
-        dispatch(sortTaskListAction(sortBy));
+        dispatch(refreshSortTasksAction());
     }
 
     const handleSortByChange = (sortByEvent) => {
-        dispatch(sortTaskListAction(sortByEvent));
-        dispatch(updateSortByAction(sortByEvent));
+        dispatch(handleUpdateSort(sortByEvent));
     }
 
-    const handleRefreshClick = () => {
+    const handleFilterChange = (filterValue) => {
+        dispatch(handleUpdateFilter(filterValue));
+    }
+
+    /*const handleRefreshClick = () => {
         dispatch(updateProgressAction());
     }
 
-    /*
+    
     <Grid item xs={5} container justifyContent='flex-end'>
         <IconButton onClick={() => updateProgressAction()}>
             <ReplayCircleFilledIcon />
@@ -78,8 +82,15 @@ const TaskList = (props) => {
                 Task List
             </Typography>
             <Stack sx={{ width: '95%'}}>
-                <Grid container spacing={2} container justifyContent='flex-start'>
-                    <Grid item xs='auto'>
+                <Grid spacing={2} container justifyContent='flex-start'>
+                    <Grid item xs={6} container justifyContent='flex-start'>
+                        <Search
+                            filter={filter}
+                            handleFilterChange={handleFilterChange}
+                            label='Search Task'
+                        />
+                    </Grid>
+                    <Grid item xs={6} container justifyContent='flex-end'>
                         <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
                             <InputLabel id="demo-select-small">SortBy</InputLabel>
                             <Select
@@ -103,8 +114,12 @@ const TaskList = (props) => {
             <Stack sx={{ width: '95%'}} spacing={1}>
                 {tasks.map(task => {
                     return (
-                        <Task key={task.id} task={task} sortBy={sortBy} loading={loading} />
-                    )
+                        <Task
+                            key={task.id}
+                            task={task}
+                            isVisible={task.isVisible}
+                        />
+                    )    
                 })}
                 <ThemeProvider theme={buttonTheme}>
                     <Button variant='contained' color='primary' startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>

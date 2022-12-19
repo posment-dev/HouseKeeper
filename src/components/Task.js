@@ -1,5 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
+import { confirmAlert } from 'react-confirm-alert'
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -12,23 +14,39 @@ import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 
-import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays, sortTaskListAction} from '../redux/store';
+import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays, refreshSortTasksAction} from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { calcProgress } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
 
-	const { task, sortBy, loading } = props;
+	const { task, isVisible} = props;
     const dispatch = useDispatch();
 
     const removeTask = () => {
-        dispatch(handleRemoveTask(task));
+    	confirmAlert({
+			title: 'Confirm to Delete',
+			message: 'Are you sure?',
+			buttons: [
+				{
+			  		label: 'Yes',
+			  		onClick: () => dispatch(handleRemoveTask(task)),
+				},
+				{
+			  		label: 'Cancel',
+				}
+			]
+		});
     }
+
+    /*const removeTask = () => {
+    	dispatch(handleRemoveTask(task));
+    }*/
 
     const resetTask = () => {
         dispatch(handleResetTask(task));
-        dispatch(sortTaskListAction(sortBy));
+        dispatch(refreshSortTasksAction());
     }
 
     const toggleEditMode = () => {
@@ -38,7 +56,7 @@ const Task = (props) => {
     const handleSaveTask = () => {
     	dispatch(handleUpdateTask(task.id, task.name, task.days_repeat));
     	toggleEditMode();
-    	dispatch(sortTaskListAction(sortBy));
+    	dispatch(refreshSortTasksAction());
     }
 
     const handleChangeName = (name) => {
@@ -49,8 +67,8 @@ const Task = (props) => {
     	dispatch(handleUpdateTaskDays(task.id, days_repeat));	
     }
 
-    if (loading === true) {
-        return (<h3>Loading...</h3>)
+    if (isVisible === false) {
+    	return null
     }
 
 	return(

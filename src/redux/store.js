@@ -4,8 +4,8 @@ import axios from 'axios';
 import { SortByEnum } from '../Constants/Enums'
 import { calcProgress } from '../Constants/StaticFunctions';
 
-//const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
-const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
+const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
+//const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
 
 const SORTING_DEFAULT = SortByEnum.Name
 
@@ -20,6 +20,8 @@ const RESET_TIME_TASK = 'RESET_TIME_TASK'
 const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
 const SORT_TASK_LIST = 'SORT_TASK_LIST'
 const UPDATE_SORTBY = 'UPDATE_SORTBY'
+const UPDATE_FILTER = 'UPDATE_FILTER'
+const FILTER_TASKS = 'FILTER_TASKS'
 
 export function addTaskAction (task) {
     return {
@@ -160,17 +162,52 @@ export function toggleEditModeAction (id) {
     }
 }
 
-export function sortTaskListAction (sortByValue) {
+function sortTaskListAction (sortByValue) {
     return {
         type: SORT_TASK_LIST,
         sortByValue,
     }
 }
 
-export function updateSortByAction (sortByValue) {
+function updateSortByAction (sortByValue) {
     return {
         type: UPDATE_SORTBY,
         sortByValue,
+    }
+}
+
+export function refreshSortTasksAction () {
+    return (dispatch, getState) => {
+        const currSortBy = getState().sortBy;
+        dispatch(sortTaskListAction(currSortBy))
+    }
+}
+
+export function handleUpdateSort (sortByValue) {
+    return dispatch => {
+        dispatch(updateSortByAction(sortByValue));
+        dispatch(sortTaskListAction(sortByValue))
+    }
+}
+
+function updateFilterAction (filterValue) {
+    return {
+        type: UPDATE_FILTER,
+        filterValue,
+    }
+}
+
+function filterTasksAction (filterValue) {
+    return {
+        type: FILTER_TASKS,
+        filterValue,
+    }
+}
+
+export function handleUpdateFilter (filterValue) {
+    return dispatch => {
+        dispatch(updateFilterAction(filterValue));
+        dispatch(filterTasksAction(filterValue));
     }
 }
 
@@ -218,7 +255,12 @@ function tasks (state = [], action) {
             last_reset: new Date(),
         }]);
     case SET_TASKS :
-        return action.tasks;
+        return action.tasks.map(task => {
+            return {
+                ...task,
+                isVisible: true,
+            }
+        });
     case REMOVE_TASK :
         return state.filter(task => task.id !== action.id);
     case UPDATE_TASK :
@@ -269,6 +311,9 @@ function tasks (state = [], action) {
                 editMode: ! task.editMode
         }});
     case SORT_TASK_LIST :
+        if (action.sortByValue === null) {
+            action.sortByValue = store.getState(sortBy);
+        }
         if (action.sortByValue === SortByEnum.NextEnding) {
             return state.slice().sort(compareTaskByDate);
         }
@@ -276,6 +321,29 @@ function tasks (state = [], action) {
             return state.slice().sort(compareTaskByName);
         }
         return state;
+    case FILTER_TASKS :
+        if (action.filterValue) {
+            return state.slice().map(task => {
+                if ( task.name.toLowerCase()
+                    .includes(action.filterValue.toLowerCase()) ) {
+                    return {
+                        ...task,
+                        isVisible: true,
+                    }
+                } else {
+                    return {
+                        ...task,
+                        isVisible: false,
+                    }
+                }
+            })
+        }
+        return state.slice().map(task => {
+            return {
+                ...task,
+                isVisible: true,
+            }
+        })
     default :
         return state;
     }
@@ -285,6 +353,15 @@ function sortBy (state = SORTING_DEFAULT, action) {
     switch (action.type) {
         case UPDATE_SORTBY :
             return action.sortByValue;
+        default :
+            return state;
+    }
+}
+
+function filter (state = '', action) {
+    switch (action.type) {
+        case UPDATE_FILTER :
+            return action.filterValue;
         default :
             return state;
     }
@@ -316,6 +393,7 @@ const logger = (store) => (next) => (action) => {
 const store = createStore(combineReducers({
     tasks,
     sortBy,
+    filter,
     loading,
 }), applyMiddleware(thunk, checker, logger))
 
