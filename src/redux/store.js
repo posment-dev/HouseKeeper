@@ -38,7 +38,7 @@ export function handleAddTask(task, cb = () => {}) {
             ...task,
             id: newId,
         }
-        dispatch(addTaskAction(task));
+        dispatch(addTaskAction(newTask));
         dispatch(refreshSortTasksAction());
         return axios.post(API_URL + '?name=' + task.name + '&days_repeat=' + task.days_repeat)
         .then(() => cb() )

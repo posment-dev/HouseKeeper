@@ -10,7 +10,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
-//import IconButton from '@mui/material/IconButton';
+import IconButton from '@mui/material/IconButton';
 //import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -66,7 +66,7 @@ const ActionBar = (props) => {
                         label='Search Task'
                     />
                 </Grid>
-                <Grid item xs={6} container justifyContent='flex-end'>
+                <Grid item xs={5} container justifyContent='flex-end'>
                     <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
                         <InputLabel id="demo-select-small">SortBy</InputLabel>
                         <Select
@@ -84,6 +84,11 @@ const ActionBar = (props) => {
                             }
                         </Select>
                     </FormControl>
+                </Grid>
+                <Grid item xs={1} container justifyContent='center'>
+                    <IconButton onClick={() => submitAddTask()} aria-label="add">
+                        <AddCircleIcon />
+                    </IconButton>
                 </Grid>
             </Grid>
         </Stack>

@@ -92,11 +92,6 @@ const TaskList = (props) => {
                         />
                     )    
                 })}
-                <ThemeProvider theme={buttonTheme}>
-                    <Button variant='contained' color='primary' startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>
-                        Add Task
-                    </Button>
-                </ThemeProvider>
             </Stack>
         </Box>
     );
