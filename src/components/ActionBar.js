@@ -1,7 +1,15 @@
 import React from 'react';
 
 import Search from './Search';
-import { handleAddTask, handleUpdateSort, handleUpdateFilter, refreshSortTasksAction } from '../redux/store';
+import {
+    handleAddTask,
+    handleUpdateSort,
+    handleUpdateFilter,
+    refreshSortTasksAction,
+    toggleFullEditModeAction,
+    handleRemoveSelectedTasks,
+    togglePauseInput,
+} from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { SortByEnum, Actions } from '../Constants/Enums'
 
@@ -19,29 +27,34 @@ import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
+import TextField from '@mui/material/TextField';
 
 import PropTypes from 'prop-types';
 
 const ActionBar = (props) => {
 
-    const { sortBy, filter } = props;
+    const { sortBy, filter, editModeTasks, pauseInput} = props;
     const dispatch = useDispatch();
 
     const submitAddTask = () => {
         let task = {
             name: 'New Task',
             days_repeat: 10,
-            editMode: true,
         }
         dispatch(handleAddTask(task));
     }
 
-    const handleSortByChange = (sortByEvent) => {
-        dispatch(handleUpdateSort(sortByEvent));
-    }
+    const handleSortByChange = (sortByEvent) => dispatch(handleUpdateSort(sortByEvent));
 
-    const handleFilterChange = (filterValue) => {
-        dispatch(handleUpdateFilter(filterValue));
+    const handleFilterChange = (filterValue) => dispatch(handleUpdateFilter(filterValue));
+
+    const handleToggleFullEdit = () => dispatch(toggleFullEditModeAction());
+
+    const handleTogglePauseInput = () => dispatch(togglePauseInput());
+
+    const handleRemoveSelected = () => {
+        dispatch(handleRemoveSelectedTasks());
+        handleToggleFullEdit();
     }
 
     /*const handleRefreshClick = () => {
@@ -57,40 +70,100 @@ const ActionBar = (props) => {
     */
 
     return (
-        <Stack sx={{ width: '95%'}}>
-            <Grid spacing={2} container justifyContent='flex-start'>
-                <Grid item xs={6} container justifyContent='flex-start'>
-                    <Search
-                        filter={filter}
-                        handleFilterChange={handleFilterChange}
-                        label='Search Task'
-                    />
-                </Grid>
-                <Grid item xs={5} container justifyContent='flex-end'>
-                    <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
-                        <InputLabel id="demo-select-small">SortBy</InputLabel>
-                        <Select
-                            id="sort-by-select"
-                            value={sortBy}
-                            label='SortBy'
-                            onChange={(event) => handleSortByChange(event.target.value)}
-                        >
-                            {
-                                Object.values(SortByEnum).map(value => {
-                                    return (
-                                        <MenuItem key={value} value={value}>{value}</MenuItem>
-                                    )
-                                })
-                            }
-                        </Select>
-                    </FormControl>
-                </Grid>
-                <Grid item xs={1} container justifyContent='center'>
-                    <IconButton onClick={() => submitAddTask()} aria-label="add">
-                        <AddCircleIcon />
-                    </IconButton>
-                </Grid>
-            </Grid>
+        <Stack
+            spacing={0}
+            sx={{ width: '95%'}}
+        >
+            <Stack
+                direction='row'
+                justifyContent='space-between'
+                alignItems='center'
+                sx={{ width: '95%'}}
+            >
+                <Button
+                    variant='text'
+                    onClick={() => handleToggleFullEdit()}
+                >{editModeTasks ? 'Done' : 'Edit Tasks'}</Button>
+                <Search
+                    filter={filter}
+                    handleFilterChange={handleFilterChange}
+                    label='Search Task'
+                />
+                <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
+                    <InputLabel id="demo-select-small">SortBy</InputLabel>
+                    <Select
+                        id="sort-by-select"
+                        value={sortBy}
+                        label='SortBy'
+                        onChange={(event) => handleSortByChange(event.target.value)}
+                    >
+                        {
+                            Object.values(SortByEnum).map(value => {
+                                return (
+                                    <MenuItem key={value} value={value}>{value}</MenuItem>
+                                )
+                            })
+                        }
+                    </Select>
+                </FormControl>
+                <IconButton onClick={() => submitAddTask()} aria-label="add">
+                    <AddCircleIcon />
+                </IconButton>
+            </Stack>
+            {
+                editModeTasks ?
+                (
+                    <Stack
+                        direction='row'
+                        justifyContent='flex-start'
+                        alignItems='center'
+                    >
+                        <Button
+                            variant='text'
+                            color='secondary'
+                            onClick={() => handleTogglePauseInput()}
+                        >Set Pause</Button>
+                        <Button
+                            variant='text'
+                            color='secondary'
+                            onClick={() => handleRemoveSelected()}
+                        >Remove</Button>
+                    </Stack>
+                ) : ''
+            }
+            {
+                editModeTasks && pauseInput ?
+                (
+                    <Stack
+                        direction='row'
+                        justifyContent='flex-start'
+                        alignItems='center'
+                    >
+                        <FormControl sx={{ minWidth: 80 }} margin='normal'>
+                            <TextField
+                                id="pause"
+                                type="number"
+                                value={filter}
+                                onChange={(e) => handleFilterChange(e.target.value) }
+                                label="How many days?"
+                                variant="outlined"
+                                placeholder="Pause..."
+                                size="small"
+                            />
+                        </FormControl>
+                        <Button
+                            variant='text'
+                            color='secondary'
+                            onClick={() => handleRemoveSelected()}
+                        >Save</Button>
+                        <Button
+                            variant='text'
+                            color='secondary'
+                            onClick={() => handleTogglePauseInput()}
+                        >Cancel</Button>
+                    </Stack>
+                ) : ''
+            }
         </Stack>
     );
 }

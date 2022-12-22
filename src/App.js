@@ -13,6 +13,8 @@ function App() {
     tasks: state.tasks,
     sortBy: state.sortBy,
     filter: state.filter,
+    editModeTasks: state.editModeTasks,
+    pauseInput: state.pauseInput,
     loading: state.loading,
   }))(TaskList);
 

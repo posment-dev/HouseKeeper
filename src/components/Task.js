@@ -1,7 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types'
-import { confirmAlert } from 'react-confirm-alert'
-import 'react-confirm-alert/src/react-confirm-alert.css';
 
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -31,28 +29,12 @@ import { calcProgress } from '../Constants/StaticFunctions';
 const Task = (props) => {
 
 
-	const { task, isVisible} = props;
+	const { task, editModeTasks} = props;
     const dispatch = useDispatch();
 
     const removeTask = () => {
-    	confirmAlert({
-			title: 'Confirm to Delete',
-			message: 'Are you sure?',
-			buttons: [
-				{
-			  		label: 'Yes',
-			  		onClick: () => dispatch(handleRemoveTask(task)),
-				},
-				{
-			  		label: 'Cancel',
-				}
-			]
-		});
-    }
-
-    /*const removeTask = () => {
     	dispatch(handleRemoveTask(task));
-    }*/
+    }
 
     const resetTask = () => {
         dispatch(handleResetTask(task));
@@ -79,7 +61,7 @@ const Task = (props) => {
     	dispatch(toggleSelectTaskAction(task.id));
     }
 
-    if (isVisible === false) {
+    if (task.isVisible === false) {
     	return null
     }
 
@@ -96,13 +78,17 @@ const Task = (props) => {
 	        }}
 	    >
 	        <Grid container spacing={2}>
-	        	<Grid item xs='auto'>
-	        		<Checkbox
-	        			checked={task.isSelected}
-	        			onChange={() => handleChangeSelected()}
-	        			color='default'
-					/>
-	        	</Grid>
+	        	{
+	        		editModeTasks ? (
+		        		<Grid item xs='auto'>
+			        		<Checkbox
+			        			checked={task.isSelected}
+			        			onChange={() => handleChangeSelected()}
+			        			color='default'
+							/>
+			        	</Grid>
+			        	) : ''
+	        	}
 	            <Grid item xs={6}>    
 	                {
 	                	task.editMode ? (<TextField
@@ -136,23 +122,18 @@ const Task = (props) => {
 	            </Grid>
 	            <Grid item xs={5} container justifyContent='flex-end'>
 	                {
-	                	! task.editMode ? (<IconButton onClick={() => resetTask()} aria-label="reset">
+	                	! editModeTasks ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />
-		                </IconButton>) : ('')
+		                </IconButton>) : ''
 	            	}
 	            	{
-	            		task.editMode ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
+	            		task.editMode && editModeTasks ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
 				                    <SaveIcon />
 				                </IconButton>
-	            		) : (<IconButton onClick={() => toggleEditMode()} aria-label="edit">
+	            		) : editModeTasks ? (<IconButton onClick={() => toggleEditMode()} aria-label="edit">
 			                    <EditIcon />
 			                </IconButton>
-	            		)
-	            	}
-	            	{
-	            		! task.editMode ? (<IconButton onClick={() => removeTask()} aria-label="delete">
-	                    	<DeleteIcon />
-	                	</IconButton>) : ('')
+	            		) : ''
 	            	}
 	            </Grid>
 	        </Grid>

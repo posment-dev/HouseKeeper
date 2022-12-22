@@ -25,52 +25,7 @@ import PropTypes from 'prop-types';
 
 const TaskList = (props) => {
 
-    const { tasks, sortBy, filter, loading } = props;
-    const dispatch = useDispatch();
-
-    const buttonTheme = createTheme({
-      palette: {
-        primary: {
-            main: grey[900],
-        },
-      }
-    });
-
-    const getHighestTaskId = () => {
-        return Math.max.apply(null, tasks.map(t => t.id));
-    }
-
-    const submitAddTask = () => {
-        let newId = getHighestTaskId() + 1;
-        let task = {
-            id: newId,
-            name: 'New Task',
-            days_repeat: 10,
-            editMode: true,
-        }
-        dispatch(handleAddTask(task));
-        dispatch(refreshSortTasksAction());
-    }
-
-    const handleSortByChange = (sortByEvent) => {
-        dispatch(handleUpdateSort(sortByEvent));
-    }
-
-    const handleFilterChange = (filterValue) => {
-        dispatch(handleUpdateFilter(filterValue));
-    }
-
-    /*const handleRefreshClick = () => {
-        dispatch(updateProgressAction());
-    }
-
-    
-    <Grid item xs={5} container justifyContent='flex-end'>
-        <IconButton onClick={() => updateProgressAction()}>
-            <ReplayCircleFilledIcon />
-        </IconButton>
-    </Grid>
-    */
+    const { tasks, sortBy, filter, editModeTasks, pauseInput, loading } = props;
 
     if (loading === true) {
         return (<h3>Loading...</h3>)
@@ -81,14 +36,14 @@ const TaskList = (props) => {
             <Typography variant='h2' component='div'>
                 Task List
             </Typography>
-            <ActionBar sortBy={sortBy} filter={filter} />
+            <ActionBar sortBy={sortBy} filter={filter} editModeTasks={editModeTasks} pauseInput={pauseInput} />
             <Stack sx={{ width: '95%'}} spacing={1}>
                 {tasks.map(task => {
                     return (
                         <Task
                             key={task.id}
                             task={task}
-                            isVisible={task.isVisible}
+                            editModeTasks={editModeTasks}
                         />
                     )    
                 })}

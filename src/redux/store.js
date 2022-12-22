@@ -9,6 +9,7 @@ const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
 
 const SORTING_DEFAULT = SortByEnum.name
 
+// Changing Tasks
 const ADD_TASK = 'ADD_TASK'
 const SET_TASKS = 'SET_TASKS'
 const REMOVE_TASK = 'REMOVE_TASK'
@@ -18,11 +19,14 @@ const UPDATE_DAYS = 'UPDATE_DAYS'
 const UPDATE_PROGRESS = 'UPDATE_PROGRESS'
 const RESET_TIME_TASK = 'RESET_TIME_TASK'
 const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
+// Changing UI
 const SORT_TASK_LIST = 'SORT_TASK_LIST'
 const UPDATE_SORTBY = 'UPDATE_SORTBY'
 const UPDATE_FILTER = 'UPDATE_FILTER'
 const FILTER_TASKS = 'FILTER_TASKS'
 const TOGGLE_SELECT_TASK = 'TOGGLE_SELECT_TASK'
+const TOGGLE_FULL_EDIT_MODE = 'TOGGLE_FULL_EDIT_MODE'
+const TOGGLE_SET_PAUSE_INPUT = 'TOGGLE_SET_PAUSE_INPUT'
 
 function addTaskAction (task) {
     return {
@@ -33,18 +37,24 @@ function addTaskAction (task) {
 
 export function handleAddTask(task, cb = () => {}) {
     return (dispatch, getState) => {
-        const newId = 1 + Math.max.apply(null, getState().tasks.map(t => t.id));
+        let newId = 1;
+        if (getState().tasks.length > 0) {
+            newId = 1 + Math.max.apply(null, getState().tasks.map(t => t.id));
+        }
         const newTask = {
             ...task,
             id: newId,
         }
         dispatch(addTaskAction(newTask));
         dispatch(refreshSortTasksAction());
-        return axios.post(API_URL + '?name=' + task.name + '&days_repeat=' + task.days_repeat)
+        return axios.post(API_URL, {
+            name: task.name,
+            days_repeat: task.days_repeat
+        })
         .then(() => cb() )
         .catch((err) => {
         console.log(err);
-        dispatch(removeTaskAction(task.id));
+        dispatch(removeTaskAction(newId));
         alert('Add new Task failed. Try again.');
         })
     }
@@ -72,6 +82,27 @@ export function handleRemoveTask(task, cb = () => {}) {
         .catch((err) => {
             console.log(err);
             dispatch(addTaskAction(task));
+            alert('Deleting Task failed. Try again.');
+        })
+    }
+}
+
+export function handleRemoveSelectedTasks(cb = () => {}) {
+    return (dispatch, getState) => {
+        const selected = getState().tasks.reduce((filtered, task) => {
+            if (task.isSelected === true) {
+                return [...filtered, task];
+            }
+            return filtered;
+        }, []);
+        selected.forEach(t => dispatch(removeTaskAction(t.id)));
+        const selectedIds = selected.map(t => t.id);
+        const body = {data: JSON.stringify(selectedIds)};
+        return axios.delete(API_URL, body)
+        .then(() => cb() )
+        .catch((err) => {
+            console.log(err);
+            selected.forEach(t => dispatch(addTaskAction(t)));
             alert('Deleting Task failed. Try again.');
         })
     }
@@ -185,27 +216,6 @@ export function handleUpdateSort (sortByValue) {
     }
 }
 
-function updateFilterAction (filterValue) {
-    return {
-        type: UPDATE_FILTER,
-        filterValue,
-    }
-}
-
-function filterTasksAction (filterValue) {
-    return {
-        type: FILTER_TASKS,
-        filterValue,
-    }
-}
-
-export function handleUpdateFilter (filterValue) {
-    return dispatch => {
-        dispatch(updateFilterAction(filterValue));
-        dispatch(filterTasksAction(filterValue));
-    }
-}
-
 export function toggleSelectTaskAction (id) {
     return {
         type: TOGGLE_SELECT_TASK,
@@ -224,7 +234,6 @@ export function handleInitialData() {
         })
     }
 }
-
 
 function compareTaskByDate (a,b) {
   if ( (100 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat < (100 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
@@ -256,7 +265,7 @@ function initialiseTask (task) {
     }
 }
 
-//recuders
+//recuder
 function tasks (state = [], action) {
     switch(action.type) {
     case ADD_TASK :
@@ -341,6 +350,7 @@ function tasks (state = [], action) {
                     return {
                         ...task,
                         isVisible: false,
+                        isSelected: false,
                     }
                 }
             })
@@ -365,6 +375,7 @@ function tasks (state = [], action) {
     }
 }
 
+//reducer
 function sortBy (state = SORTING_DEFAULT, action) {
     switch (action.type) {
         case UPDATE_SORTBY :
@@ -374,6 +385,28 @@ function sortBy (state = SORTING_DEFAULT, action) {
     }
 }
 
+function updateFilterAction (filterValue) {
+    return {
+        type: UPDATE_FILTER,
+        filterValue,
+    }
+}
+
+function filterTasksAction (filterValue) {
+    return {
+        type: FILTER_TASKS,
+        filterValue,
+    }
+}
+
+export function handleUpdateFilter (filterValue) {
+    return dispatch => {
+        dispatch(updateFilterAction(filterValue));
+        dispatch(filterTasksAction(filterValue));
+    }
+}
+
+//reducer
 function filter (state = '', action) {
     switch (action.type) {
         case UPDATE_FILTER :
@@ -383,6 +416,39 @@ function filter (state = '', action) {
     }
 }
 
+export function toggleFullEditModeAction () {
+    return {
+        type: TOGGLE_FULL_EDIT_MODE,
+    }
+}
+
+//reducer
+function editModeTasks (state = false, action) {
+    switch (action.type) {
+        case TOGGLE_FULL_EDIT_MODE :
+            return ! state;
+        default :
+            return state;
+    }
+}
+
+export function togglePauseInput () {
+    return {
+        type: TOGGLE_SET_PAUSE_INPUT,
+    }
+}
+
+//reducer
+function pauseInput (state = false, action) {
+    switch (action.type) {
+        case TOGGLE_SET_PAUSE_INPUT :
+            return ! state;
+        default :
+            return state;
+    }
+}
+
+//reducer
 function loading (state = true, action) {
     switch(action.type) {
         case SET_TASKS :
@@ -409,6 +475,8 @@ const store = createStore(combineReducers({
     tasks,
     sortBy,
     filter,
+    editModeTasks,
+    pauseInput,
     loading,
 }), applyMiddleware(thunk, checker, logger))
 

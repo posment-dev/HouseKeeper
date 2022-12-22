@@ -10,7 +10,7 @@ const Search = (props) => {
 	const { filter, handleFilterChange, label} = props;
 
 	return (
-		<FormControl sx={{ minWidth: 120 }} margin='normal'>
+		<FormControl sx={{ minWidth: 80 }} margin='normal'>
 		    <TextField
 				id="search-field"
 				className="text"
