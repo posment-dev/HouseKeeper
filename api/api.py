@@ -1,8 +1,8 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, json, make_response
 from sqlalchemy.sql import func
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Task
+from models import Base, Task, Pause
 from constants import DB_LOCATION
 
 
@@ -14,17 +14,54 @@ session = DBSession()
 
 app = Flask(__name__)
 
-@app.route('/api/v1/tasks', methods = ['GET', 'POST'])
+class InvalidUsage(Exception):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        Exception.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        return rv
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+@app.route('/api/v1/tasks', methods = ['GET', 'POST', 'DELETE', 'OPTIONS'])
 def tasks():
+	if request.method == 'OPTIONS':
+		return _build_cors_preflight_response('GET, PUT, DELETE, OPTIONS')
 	if request.method == 'GET':
 		return _corsify_actual_response(getAllTasks())
 	if request.method == 'POST':
-		print("Making a new taks")
-		name = request.args.get('name', '')
-		days_repeat = request.args.get('days_repeat', '')
-		print(name)
-		print(days_repeat)
-		return _corsify_actual_response(makeANewTask(name, days_repeat))
+		if request.data :
+			print("Making a new taks")
+			req_body = json.loads(request.data)
+			print(type(req_body))
+			name = req_body['name']
+			days_repeat = req_body['days_repeat']
+			print(name)
+			print(days_repeat)
+			return _corsify_actual_response(makeANewTask(name, days_repeat))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
+	if request.method == 'DELETE':
+		print(request.data)
+		if request.data :
+			print("Deleting multiple Tasks")
+			ids = json.loads(request.data)
+			print("with ids: " + str(ids)[1:-1])
+			return _corsify_actual_response(deleteMultipleTasks(ids))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
 
 
 @app.route('/api/v1/tasks/<int:id>', methods = ['GET', 'PUT', 'DELETE', 'OPTIONS'])
@@ -45,15 +82,26 @@ def task(id):
 
 
 @app.route('/api/v1/tasks/reset/<int:id>', methods = ['PUT', 'OPTIONS'])
-def reset_taks(id):
+def reset_task(id):
 	if request.method == 'OPTIONS':
 		return _build_cors_preflight_response('PUT, OPTIONS')
 	if request.method == 'PUT':
 		return _corsify_actual_response(resetTask(id))
 
-# Flask App Config
-#if __name__ == "__main__":
-#    app.run(host='0.0.0.0')
+@app.route('/api/v1/tasks/pauses', methods = ['GET', 'PUT', 'OPTIONS'])
+def pause_task():
+	if request.method == 'OPTIONS':
+		return _build_cors_preflight_response('GET', 'PUT, OPTIONS')
+	if request.method == 'GET':
+		return _corsify_actual_response(getAllPauses())
+	if request.method == 'PUT':
+		if request.data :
+			print("Pausing taks")
+			req_body = json.loads(request.data)
+			print(req_body)
+			return _corsify_actual_response(pauseTasks(req_body))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
 
 def getAllTasks():
 	tasks = session.query(Task).all()
@@ -91,6 +139,30 @@ def deleteTask(id):
 	session.delete(task)
 	session.commit()
 	return jsonify("Removed Task with id %s" % id)
+
+def deleteMultipleTasks(ids):
+	for id in ids:
+		task = session.query(Task).filter_by(id = id).one()
+		session.delete(task)
+	session.commit()
+	return jsonify("Removed Tasks with ids %s" % ids)
+
+def getAllPauses():
+	pauses = session.query(Pause).all()
+	return jsonify(Pauses=[i.serialize for i in pauses])
+
+def pauseTasks(id_val_dict):
+	for tid in id_val_dict:
+		query = session.query(Pause).filter_by(taskId = tid)
+		if query.count() > 0:
+			pause = query.one()
+			pause.starting = func.now()
+			pause.duration = id_val_dict[tid]
+		else:
+			pause = Pause(taskId = tid, starting = func.now(), duration = id_val_dict[tid])
+		session.add(pause)
+	session.commit()
+	return jsonify("Tasks with ids %s paused for %s days" % (id_val_dict.keys(), id_val_dict.values()))
 
 def _corsify_actual_response(response):
 	response.headers.add("Access-Control-Allow-Origin", "*")

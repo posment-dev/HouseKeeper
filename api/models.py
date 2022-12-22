@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from sqlalchemy import create_engine
@@ -17,15 +17,32 @@ class Task(Base):
 
     @property
     def serialize(self):
-       """Return object data in easily serializeable format"""
-       return {
-       	    'id': self.id,
+        """Return object data in easily serializeable format"""
+        return {
+        	'id': self.id,
             'name': self.name,
             'days_repeat': self.days_repeat,
             'last_reset': self.last_reset
-       }
+        }
  
 
+class Pause(Base):
+    __tablename__ = 'pause'
+
+    id = Column(Integer, primary_key = True)
+    taskId = Column(Integer, nullable = False)
+    starting = Column(DateTime, default = func.now())
+    duration = Column(Integer, nullable = False)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id': self.id,
+            'taskId': self.taskId,
+            'starting': self.starting,
+            'duration': self.duration
+        }
 
 engine = create_engine(DB_LOCATION)
 Base.metadata.create_all(engine)
