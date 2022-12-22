@@ -4,8 +4,8 @@ import axios from 'axios';
 import { SortByEnum } from '../Constants/Enums'
 import { calcProgress } from '../Constants/StaticFunctions';
 
-//const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
-const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
+const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
+//const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
 
 const SORTING_DEFAULT = SortByEnum.Name
 
@@ -22,6 +22,7 @@ const SORT_TASK_LIST = 'SORT_TASK_LIST'
 const UPDATE_SORTBY = 'UPDATE_SORTBY'
 const UPDATE_FILTER = 'UPDATE_FILTER'
 const FILTER_TASKS = 'FILTER_TASKS'
+const TOGGLE_SELECT_TASK = 'TOGGLE_SELECT_TASK'
 
 export function addTaskAction (task) {
     return {
@@ -78,25 +79,11 @@ export function updateTaskNameAction (id, name) {
     }
 }
 
-export function handleUpdateTaskName (id, name, cb = () => {}) {
-    return (dispatch) => {
-        dispatch(updateTaskNameAction(id, name));
-        return () => cb();
-    }
-}
-
 export function updateTaskDaysAction (id, days_repeat) {
     return {
         type: UPDATE_DAYS,
         id,
         days_repeat,
-    }
-}
-
-export function handleUpdateTaskDays (id, days_repeat, cb = () => {}) {
-    return (dispatch) => {
-        dispatch(updateTaskDaysAction(id, days_repeat));
-        return () => cb();
     }
 }
 
@@ -211,6 +198,13 @@ export function handleUpdateFilter (filterValue) {
     }
 }
 
+export function toggleSelectTaskAction (id) {
+    return {
+        type: TOGGLE_SELECT_TASK,
+        id,
+    }
+}
+
 export function handleInitialData() {
     return async (dispatch) => {
         return Promise.all([
@@ -259,6 +253,7 @@ function tasks (state = [], action) {
             return {
                 ...task,
                 isVisible: true,
+                isSelected: false,
             }
         });
     case REMOVE_TASK :
@@ -344,6 +339,15 @@ function tasks (state = [], action) {
                 isVisible: true,
             }
         })
+    case TOGGLE_SELECT_TASK :
+        return state.map((task) => {
+            if (task.id !== action.id) {
+                return task;
+            }
+            return {
+                ...task,
+                isSelected: ! task.isSelected
+        }});
     default :
         return state;
     }

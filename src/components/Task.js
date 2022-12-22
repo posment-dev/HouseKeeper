@@ -13,8 +13,18 @@ import TextField from '@mui/material/TextField';
 import LinearProgress from '@mui/material/LinearProgress';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
+import Checkbox from '@mui/material/Checkbox';
 
-import { handleRemoveTask, handleResetTask, handleUpdateTask, toggleEditModeAction, handleUpdateTaskName, handleUpdateTaskDays, refreshSortTasksAction} from '../redux/store';
+import {
+	handleRemoveTask,
+	handleResetTask,
+	handleUpdateTask,
+	toggleEditModeAction,
+	updateTaskNameAction,
+	updateTaskDaysAction,
+	refreshSortTasksAction,
+	toggleSelectTaskAction
+} from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { calcProgress } from '../Constants/StaticFunctions';
 
@@ -60,11 +70,15 @@ const Task = (props) => {
     }
 
     const handleChangeName = (name) => {
-    	dispatch(handleUpdateTaskName(task.id, name));
+    	dispatch(updateTaskNameAction(task.id, name));
     }
 
     const handleChangeDays = (days_repeat) => {
-    	dispatch(handleUpdateTaskDays(task.id, days_repeat));	
+    	dispatch(updateTaskDaysAction(task.id, days_repeat));	
+    }
+
+    const handleChangeSelected = () => {
+    	dispatch(toggleSelectTaskAction(task.id));
     }
 
     if (isVisible === false) {
@@ -84,7 +98,13 @@ const Task = (props) => {
 	        }}
 	    >
 	        <Grid container spacing={2}>
-	        	<Grid item xs={1} />
+	        	<Grid item xs='auto'>
+	        		<Checkbox
+	        			checked={task.isSelected}
+	        			onChange={() => handleChangeSelected()}
+	        			color='default'
+					/>
+	        	</Grid>
 	            <Grid item xs={6}>    
 	                {
 	                	task.editMode ? (<TextField
