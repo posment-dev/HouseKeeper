@@ -7,7 +7,7 @@ import { calcProgress } from '../Constants/StaticFunctions';
 const API_URL = 'http://127.0.0.1:5000/api/v1/tasks'
 //const API_URL = 'http://192.168.0.221:5000/api/v1/tasks'
 
-const SORTING_DEFAULT = SortByEnum.Name
+const SORTING_DEFAULT = SortByEnum.name
 
 const ADD_TASK = 'ADD_TASK'
 const SET_TASKS = 'SET_TASKS'
@@ -24,7 +24,7 @@ const UPDATE_FILTER = 'UPDATE_FILTER'
 const FILTER_TASKS = 'FILTER_TASKS'
 const TOGGLE_SELECT_TASK = 'TOGGLE_SELECT_TASK'
 
-export function addTaskAction (task) {
+function addTaskAction (task) {
     return {
     type: ADD_TASK,
     task,
@@ -32,8 +32,14 @@ export function addTaskAction (task) {
 }
 
 export function handleAddTask(task, cb = () => {}) {
-    return (dispatch) => {
+    return (dispatch, getState) => {
+        const newId = 1 + Math.max.apply(null, getState().tasks.map(t => t.id));
+        const newTask = {
+            ...task,
+            id: newId,
+        }
         dispatch(addTaskAction(task));
+        dispatch(refreshSortTasksAction());
         return axios.post(API_URL + '?name=' + task.name + '&days_repeat=' + task.days_repeat)
         .then(() => cb() )
         .catch((err) => {
@@ -51,7 +57,7 @@ export function setTasksAction (tasks) {
     }
 }
 
-export function removeTaskAction (id) {
+function removeTaskAction (id) {
     return {
     type: REMOVE_TASK,
     id,
@@ -87,7 +93,7 @@ export function updateTaskDaysAction (id, days_repeat) {
     }
 }
 
-export function updateTaskAction (id, name, days_repeat) {
+function updateTaskAction (id, name, days_repeat) {
     return {
         type: UPDATE_TASK,
         id,
@@ -99,6 +105,7 @@ export function updateTaskAction (id, name, days_repeat) {
 export function handleUpdateTask (id, name, days_repeat, cb = () => {}) {
     return async (dispatch) => {
         dispatch(updateTaskAction(id, name));
+        dispatch(refreshSortTasksAction());
         let urlAdd = '?';
         if (name) {
             urlAdd += 'name=' + name + '&';
@@ -116,7 +123,7 @@ export function handleUpdateTask (id, name, days_repeat, cb = () => {}) {
     }
 }
 
-export function resetTimeTaskAction (id) {
+function resetTimeTaskAction (id) {
     return {
         type: RESET_TIME_TASK,
         id,
@@ -126,6 +133,7 @@ export function resetTimeTaskAction (id) {
 export function handleResetTask(task, cb = () => {}) {
     return async (dispatch) => {
         dispatch(resetTimeTaskAction(task.id));
+        dispatch(refreshSortTasksAction());
         return axios.put(API_URL + '/reset/' + task.id)
         .then(() => cb() )
         .catch((err) => {
@@ -240,21 +248,25 @@ function compareTaskByName (a,b) {
         return 0;
 }
 
+function initialiseTask (task) {
+    return {
+        ...task,
+        isVisible: true,
+        isSelected: false,
+    }
+}
+
 //recuders
 function tasks (state = [], action) {
     switch(action.type) {
     case ADD_TASK :
         return state.concat([{
-            ...action.task,
+            ...initialiseTask(action.task),
             last_reset: new Date(),
         }]);
     case SET_TASKS :
         return action.tasks.map(task => {
-            return {
-                ...task,
-                isVisible: true,
-                isSelected: false,
-            }
+            return initialiseTask(task)
         });
     case REMOVE_TASK :
         return state.filter(task => task.id !== action.id);
@@ -309,10 +321,10 @@ function tasks (state = [], action) {
         if (action.sortByValue === null) {
             action.sortByValue = store.getState(sortBy);
         }
-        if (action.sortByValue === SortByEnum.NextEnding) {
+        if (action.sortByValue === SortByEnum.nextEnding) {
             return state.slice().sort(compareTaskByDate);
         }
-        if (action.sortByValue === SortByEnum.Name) {
+        if (action.sortByValue === SortByEnum.name) {
             return state.slice().sort(compareTaskByName);
         }
         return state;
@@ -378,7 +390,6 @@ function loading (state = true, action) {
         default :
             return state;
     }
-
 }
 
 const checker = (store) => (next) => (action) => {

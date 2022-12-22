@@ -56,7 +56,6 @@ const Task = (props) => {
 
     const resetTask = () => {
         dispatch(handleResetTask(task));
-        dispatch(refreshSortTasksAction());
     }
 
     const toggleEditMode = () => {
@@ -66,7 +65,6 @@ const Task = (props) => {
     const handleSaveTask = () => {
     	dispatch(handleUpdateTask(task.id, task.name, task.days_repeat));
     	toggleEditMode();
-    	dispatch(refreshSortTasksAction());
     }
 
     const handleChangeName = (name) => {

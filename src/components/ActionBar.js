@@ -1,10 +1,9 @@
 import React from 'react';
 
-import Task from './Task';
-import ActionBar from './ActionBar';
+import Search from './Search';
 import { handleAddTask, handleUpdateSort, handleUpdateFilter, refreshSortTasksAction } from '../redux/store';
 import { useDispatch } from 'react-redux';
-import { SortByEnum } from '../Constants/Enums'
+import { SortByEnum, Actions } from '../Constants/Enums'
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -23,33 +22,18 @@ import FormControl from '@mui/material/FormControl';
 
 import PropTypes from 'prop-types';
 
-const TaskList = (props) => {
+const ActionBar = (props) => {
 
-    const { tasks, sortBy, filter, loading } = props;
+    const { sortBy, filter } = props;
     const dispatch = useDispatch();
 
-    const buttonTheme = createTheme({
-      palette: {
-        primary: {
-            main: grey[900],
-        },
-      }
-    });
-
-    const getHighestTaskId = () => {
-        return Math.max.apply(null, tasks.map(t => t.id));
-    }
-
     const submitAddTask = () => {
-        let newId = getHighestTaskId() + 1;
         let task = {
-            id: newId,
             name: 'New Task',
             days_repeat: 10,
             editMode: true,
         }
         dispatch(handleAddTask(task));
-        dispatch(refreshSortTasksAction());
     }
 
     const handleSortByChange = (sortByEvent) => {
@@ -72,39 +56,43 @@ const TaskList = (props) => {
     </Grid>
     */
 
-    if (loading === true) {
-        return (<h3>Loading...</h3>)
-    }
-
     return (
-        <Box sx={{ width: '98%', p: 2 }} spacing={2}>
-            <Typography variant='h2' component='div'>
-                Task List
-            </Typography>
-            <ActionBar sortBy={sortBy} filter={filter} />
-            <Stack sx={{ width: '95%'}} spacing={1}>
-                {tasks.map(task => {
-                    return (
-                        <Task
-                            key={task.id}
-                            task={task}
-                            isVisible={task.isVisible}
-                        />
-                    )    
-                })}
-                <ThemeProvider theme={buttonTheme}>
-                    <Button variant='contained' color='primary' startIcon={<AddCircleIcon />} onClick={() => submitAddTask()}>
-                        Add Task
-                    </Button>
-                </ThemeProvider>
-            </Stack>
-        </Box>
+        <Stack sx={{ width: '95%'}}>
+            <Grid spacing={2} container justifyContent='flex-start'>
+                <Grid item xs={6} container justifyContent='flex-start'>
+                    <Search
+                        filter={filter}
+                        handleFilterChange={handleFilterChange}
+                        label='Search Task'
+                    />
+                </Grid>
+                <Grid item xs={6} container justifyContent='flex-end'>
+                    <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
+                        <InputLabel id="demo-select-small">SortBy</InputLabel>
+                        <Select
+                            id="sort-by-select"
+                            value={sortBy}
+                            label='SortBy'
+                            onChange={(event) => handleSortByChange(event.target.value)}
+                        >
+                            {
+                                Object.values(SortByEnum).map(value => {
+                                    return (
+                                        <MenuItem key={value} value={value}>{value}</MenuItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </FormControl>
+                </Grid>
+            </Grid>
+        </Stack>
     );
 }
 
-TaskList.propTypes = {
-    tasks: PropTypes.array,
-    loading: PropTypes.bool
+ActionBar.propTypes = {
+    sortBy: PropTypes.string,
+    filter: PropTypes.string,
 }
 
-export default TaskList;
+export default ActionBar;
