@@ -82,24 +82,12 @@ def task(id):
 		return _corsify_actual_response(deleteTask(id))
 
 
-@app.route('/api/v1/tasks/reset/<int:id>', methods = ['PUT', 'POST', 'OPTIONS'])
+@app.route('/api/v1/tasks/reset/<int:id>', methods = ['PUT', 'OPTIONS'])
 def reset_task(id):
 	if request.method == 'OPTIONS':
-		return _build_cors_preflight_response('PUT, POST, OPTIONS')
+		return _build_cors_preflight_response('PUT, OPTIONS')
 	if request.method == 'PUT':
 		return _corsify_actual_response(resetTask(id))
-	if request.method == 'POST':
-		if request.data :
-			print("Updating last reset")
-			req_body = json.loads(request.data)
-			input_date = req_body['last_reset']
-			fmt = '%a %b %d %Y %H:%M:%S GMT%z'
-			new_last_reset = datetime.strptime(input_date, fmt)
-			new_last_reset_utc = new_last_reset.replace(tzinfo=None).astimezone(tz=timezone.utc);
-			print(new_last_reset_utc)
-			return _corsify_actual_response(updateResetTask(id, new_last_reset_utc))
-		else:
-			raise InvalidUsage('Argument not found', status_code=400)
 
 @app.route('/api/v1/tasks/pauses', methods = ['GET', 'PUT', 'DELETE', 'OPTIONS'])
 def pause_task():
@@ -155,14 +143,6 @@ def resetTask(id):
 	session.commit()
 	return jsonify("Reset a Task with id %s" % id)
 
-def updateResetTask(id, seconds_to_add):
-	task = session.query(Task).filter_by(id = id).one()
-	task.last_reset = new_last_reset
-	session.add(task)
-	# task.update(last_reset=new_last_reset)
-	session.commit()
-	return jsonify("Change last Reset on Task with id %s" % id)
-
 def deleteTask(id):
 	task = session.query(Task).filter_by(id = id).one()
 	session.delete(task)
@@ -172,6 +152,10 @@ def deleteTask(id):
 def deleteMultipleTasks(ids):
 	for id in ids:
 		task = session.query(Task).filter_by(id = id).one()
+		qpause = session.query(Pause).filter_by(taskId = task.id)
+		if qpause.count() > 0:
+			pause = qpause.one()
+			session.delete(pause)
 		session.delete(task)
 	session.commit()
 	return jsonify("Removed Tasks with ids %s" % ids)
@@ -193,16 +177,25 @@ def pauseTasks(id_val_dict):
 	session.commit()
 	return jsonify("Tasks with ids %s paused for %s days" % (id_val_dict.keys(), id_val_dict.values()))
 
+def updateResetTask(id, seconds_to_add):
+	task = session.query(Task).filter_by(id = id).one()
+	task.last_reset += timedelta(seconds=seconds_to_add)
+	session.add(task)
+	# task.update(last_reset=new_last_reset)
+	session.commit()
+	return jsonify("Change last Reset on Task with id %s" % id)
+
 def deletePauses(ids):
 	for tid in ids:
 		query = session.query(Pause).filter_by(taskId = tid)
 		if query.count() > 0:
 			pause = query.one()
-			# calculate new last reset date
-			full_sec = datetime.timedelta(days=pause.duration).total_seconds()
-			start_now_sec = abs((pause.starting - datetime.now()).seconds)
+			# calculate and set new last reset date
+			full_sec = timedelta(days=pause.duration).total_seconds()
+			start_now_sec = (datetime.utcnow() - pause.starting).seconds
+			#print('{} - {} - {} - {}'.format(pause.starting, datetime.utcnow(), start_now_sec, datetime.utcnow() - pause.starting))
 			seconds_add_last_reset = min(full_sec, start_now_sec)
-			#updateResetTask(pause.taskId, )
+			updateResetTask(pause.taskId, seconds_add_last_reset)
 			session.delete(pause)
 		session.commit()
 	return jsonify("Removed Pauses for Tasks with ids %s" % ids)
