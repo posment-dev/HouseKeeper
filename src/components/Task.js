@@ -139,7 +139,7 @@ const Task = (props) => {
 	        </Grid>
 	        <LinearProgress
 	            key={task.id}
-	            color={calcProgress(task.last_reset, task.days_repeat) < 85 ? 'primary' : 'secondary'}
+	            color={calcProgress(task) < 85 ? 'primary' : 'secondary'}
 	            sx={{
 	                '& .MuiLinearProgress-barColorPrimary': {
 	                    bgcolor: "green",
@@ -152,7 +152,7 @@ const Task = (props) => {
 	                borderRadius: 2,
 	            }}
 	            variant='determinate'
-	            value={calcProgress(task.last_reset, task.days_repeat)}
+	            value={calcProgress(task)}
 	        />
 	    </Box>
 	)

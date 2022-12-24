@@ -9,6 +9,10 @@ import {
     toggleFullEditModeAction,
     handleRemoveSelectedTasks,
     togglePauseInput,
+    deselectAllTasksAction,
+    handleRemoveSelectedPause,
+    handlePauseSelectedTask,
+    updatePauseInputAction,
 } from '../redux/store';
 import { useDispatch } from 'react-redux';
 import { SortByEnum, Actions } from '../Constants/Enums'
@@ -44,18 +48,31 @@ const ActionBar = (props) => {
         dispatch(handleAddTask(task));
     }
 
-    const handleSortByChange = (sortByEvent) => dispatch(handleUpdateSort(sortByEvent));
-
-    const handleFilterChange = (filterValue) => dispatch(handleUpdateFilter(filterValue));
-
-    const handleToggleFullEdit = () => dispatch(toggleFullEditModeAction());
-
-    const handleTogglePauseInput = () => dispatch(togglePauseInput());
-
     const handleRemoveSelected = () => {
         dispatch(handleRemoveSelectedTasks());
         handleToggleFullEdit();
     }
+
+    const handleSortByChange = (sortByEvent) => dispatch(handleUpdateSort(sortByEvent));
+
+    const handleFilterChange = (filterValue) => dispatch(handleUpdateFilter(filterValue));
+
+    const handleToggleFullEdit = () => {
+        dispatch(toggleFullEditModeAction());
+        dispatch(deselectAllTasksAction());
+    }
+
+    const handleTogglePauseInput = () => {
+        dispatch(togglePauseInput());
+        dispatch(updatePauseInputAction(0));
+    }
+
+    const handlePauseInputChange = (duration) => dispatch(updatePauseInputAction(duration));
+
+    const handlePauseSelected = () => dispatch(handlePauseSelectedTask(pauseInput.duration));
+
+    const handleRemovePauseSelected = () => dispatch(handleRemoveSelectedPause());
+    
 
     /*const handleRefreshClick = () => {
         dispatch(updateProgressAction());
@@ -117,12 +134,18 @@ const ActionBar = (props) => {
                         direction='row'
                         justifyContent='flex-start'
                         alignItems='center'
+                        spacing={2}
                     >
                         <Button
                             variant='text'
                             color='secondary'
                             onClick={() => handleTogglePauseInput()}
-                        >Set Pause</Button>
+                        >Pause</Button>
+                        <Button
+                            variant='text'
+                            color='secondary'
+                            onClick={() => handleRemovePauseSelected()}
+                        >Reactivate</Button>
                         <Button
                             variant='text'
                             color='secondary'
@@ -132,7 +155,7 @@ const ActionBar = (props) => {
                 ) : ''
             }
             {
-                editModeTasks && pauseInput ?
+                editModeTasks && pauseInput.show ?
                 (
                     <Stack
                         direction='row'
@@ -143,8 +166,8 @@ const ActionBar = (props) => {
                             <TextField
                                 id="pause"
                                 type="number"
-                                value={filter}
-                                onChange={(e) => handleFilterChange(e.target.value) }
+                                value={pauseInput.duration}
+                                onChange={(e) => handlePauseInputChange(e.target.value) }
                                 label="How many days?"
                                 variant="outlined"
                                 placeholder="Pause..."
@@ -154,7 +177,7 @@ const ActionBar = (props) => {
                         <Button
                             variant='text'
                             color='secondary'
-                            onClick={() => handleRemoveSelected()}
+                            onClick={() => handlePauseSelected()}
                         >Save</Button>
                         <Button
                             variant='text'

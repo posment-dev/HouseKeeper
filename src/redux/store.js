@@ -19,14 +19,19 @@ const UPDATE_DAYS = 'UPDATE_DAYS'
 const UPDATE_PROGRESS = 'UPDATE_PROGRESS'
 const RESET_TIME_TASK = 'RESET_TIME_TASK'
 const TOGGLE_EDIT_MODE = 'TOGGLE_EDIT_MODE'
+const PAUSE_TASK = 'PAUSE_TASK'
+const REMOVE_PAUSE = 'REMOVE_PAUSE'
+const TOGGLE_SELECT_TASK = 'TOGGLE_SELECT_TASK'
+const DESELECT_ALL_TASKS = 'DESELECT_ALL_TASKS'
+const SELECT_ALL_TASKS = 'SELECT_ALL_TASKS'
 // Changing UI
 const SORT_TASK_LIST = 'SORT_TASK_LIST'
 const UPDATE_SORTBY = 'UPDATE_SORTBY'
 const UPDATE_FILTER = 'UPDATE_FILTER'
 const FILTER_TASKS = 'FILTER_TASKS'
-const TOGGLE_SELECT_TASK = 'TOGGLE_SELECT_TASK'
 const TOGGLE_FULL_EDIT_MODE = 'TOGGLE_FULL_EDIT_MODE'
 const TOGGLE_SET_PAUSE_INPUT = 'TOGGLE_SET_PAUSE_INPUT'
+const UPDATE_PAUSE_INPUT = 'UPDATE_PAUSE_INPUT'
 
 function addTaskAction (task) {
     return {
@@ -223,6 +228,81 @@ export function toggleSelectTaskAction (id) {
     }
 }
 
+export function selectAllTasksAction () {
+    return {
+        type: SELECT_ALL_TASKS,
+    }
+}
+
+export function deselectAllTasksAction () {
+    return {
+        type: DESELECT_ALL_TASKS,
+    }
+}
+
+function pauseTaskAction (taskId, duration) {
+    return {
+        type: PAUSE_TASK,
+        taskId,
+        duration,
+    }
+}
+
+export function handlePauseSelectedTask (duration, cb = () => {}) {
+    return async (dispatch, getState) => {
+        const selected = getState().tasks.filter( task => {
+            if (task.isSelected === true) {
+                return task;
+            }
+        });
+        let pauseMap = new Map();
+        selected.forEach(t => {
+            dispatch(pauseTaskAction(t.id, duration));
+            pauseMap.set(t.id, duration);
+        });
+        const body = Object.fromEntries(pauseMap);
+        console.log(body);
+        return axios.put(API_URL + '/pauses', body)
+        .then(() => cb() )
+        .catch((err) => {
+            console.log(err);
+            selected.forEach(t => dispatch(removePauseAction(t.id)));
+            alert('Reseting Task failed. Try again.');
+        })
+    }
+}
+
+function removePauseAction (taskId) {
+    return {
+        type: REMOVE_PAUSE,
+        taskId,
+    }
+}
+
+export function handleRemoveSelectedPause (cb = () => {}) {
+    return (dispatch, getState) => {
+        const selected = getState().tasks.reduce((filtered, task) => {
+            if (task.isSelected === true) {
+                if (task.pause.length > 0) {
+                    return [...filtered, task.pause[0]];
+                }
+            }
+            return filtered;
+        }, []);
+        selected.forEach(p => dispatch(removePauseAction(p.taskId)));
+        const selectedIds = selected.map(p => p.taskId);
+        const body = {data: JSON.stringify(selectedIds)};
+        dispatch(refreshSortTasksAction());
+        return axios.delete(API_URL + '/pauses', body)
+        .then(() => cb() )
+        .catch((err) => {
+        console.log(err);
+        selected.forEach(p => dispatch(pauseTaskAction(p.taskId, p.duration)));
+        alert('Remove Pause failed. Try again.');
+        })
+    }
+}
+
 export function handleInitialData() {
     return async (dispatch) => {
         return Promise.all([
@@ -235,11 +315,12 @@ export function handleInitialData() {
     }
 }
 
+//helper
 function compareTaskByDate (a,b) {
-  if ( (100 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat < (100 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+  if ( (100 - calcProgress(a)) * a.days_repeat < (100 - calcProgress(b)) * b.days_repeat ){
     return -1;
   }
-  if ( (100 - calcProgress(a.last_reset, a.days_repeat)) * a.days_repeat > (100 - calcProgress( b.last_reset, b.days_repeat)) * b.days_repeat ){
+  if ( (100 - calcProgress(a)) * a.days_repeat > (100 - calcProgress(b)) * b.days_repeat ){
     return 1;
   }
   return 0;
@@ -265,6 +346,12 @@ function initialiseTask (task) {
     }
 }
 
+Date.prototype.addMsec = function(msec) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + (msec / 1000 / 60 / 60 / 24));
+    return date;
+}
+
 //recuder
 function tasks (state = [], action) {
     switch(action.type) {
@@ -272,6 +359,7 @@ function tasks (state = [], action) {
         return state.concat([{
             ...initialiseTask(action.task),
             last_reset: new Date(),
+            pause: [],
         }]);
     case SET_TASKS :
         return action.tasks.map(task => {
@@ -370,6 +458,57 @@ function tasks (state = [], action) {
                 ...task,
                 isSelected: ! task.isSelected
         }});
+    case DESELECT_ALL_TASKS :
+        return state.map((task) => {
+            return {
+                ...task,
+                isSelected: false
+        }});
+    case SELECT_ALL_TASKS :
+        return state.map((task) => {
+            return {
+                ...task,
+                isSelected: true
+        }});
+    case PAUSE_TASK :
+        return state.map((task) => {
+            if (task.id !== action.taskId) {
+                return task;
+            }
+            const newPause = [{
+                duration: action.duration,
+                starting: new Date(),
+                taskId: action.taskId
+            }]
+            return {
+                ...task,
+                pause: newPause,
+            }
+        })
+    case REMOVE_PAUSE :
+        return state.map((task) => {
+            if (task.id !== action.taskId) {
+                return task;
+            }
+            let result = {
+                ...task,
+                pause: [],
+            }
+            if (task.pause.length > 0) {
+                // calculate and set new last reset date
+                const fullMsec = task.pause[0].duration * 24 * 60 * 60;
+                const startDate = new Date(task.pause[0].starting);
+                const startNowSec = (new Date() - startDate) / 1000;
+                const secondsAddLastReset = Math.min(fullMsec, startNowSec);
+                let lastReset = new Date(result.last_reset);
+                lastReset.setSeconds(lastReset.getSeconds() + secondsAddLastReset);
+                console.log(result.last_reset);
+                console.log(secondsAddLastReset)
+                result.last_reset = lastReset;
+                console.log(result.last_reset);
+            }
+            return result;
+        })
     default :
         return state;
     }
@@ -432,6 +571,13 @@ function editModeTasks (state = false, action) {
     }
 }
 
+export function updatePauseInputAction (duration) {
+    return {
+        type: UPDATE_PAUSE_INPUT,
+        duration,
+    }
+}
+
 export function togglePauseInput () {
     return {
         type: TOGGLE_SET_PAUSE_INPUT,
@@ -439,10 +585,12 @@ export function togglePauseInput () {
 }
 
 //reducer
-function pauseInput (state = false, action) {
+function pauseInput (state = {show: false, duration: 0}, action) {
     switch (action.type) {
         case TOGGLE_SET_PAUSE_INPUT :
-            return ! state;
+            return {...state, show: ! state.show};
+        case UPDATE_PAUSE_INPUT :
+            return {...state, duration: action.duration};
         default :
             return state;
     }
