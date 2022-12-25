@@ -29,3 +29,10 @@ export const calcProgress = (task) => {
         //console.log("Calulated Progress: " + progress);
         return Math.min(progress, 100);
 }
+
+export const isPaused = (task) => {
+        if (task.pause !== null) {
+                return task.pause.length > 0 ? true : false;
+        }
+        return false;
+}

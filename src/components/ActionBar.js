@@ -5,7 +5,6 @@ import {
     handleAddTask,
     handleUpdateSort,
     handleUpdateFilter,
-    refreshSortTasksAction,
     toggleFullEditModeAction,
     handleRemoveSelectedTasks,
     togglePauseInput,
@@ -15,16 +14,13 @@ import {
     updatePauseInputAction,
 } from '../redux/store';
 import { useDispatch } from 'react-redux';
-import { SortByEnum, Actions } from '../Constants/Enums'
+import { SortByEnum } from '../Constants/Enums'
 
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
-//import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
+import AddIcon from '@mui/icons-material/Add';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { grey } from '@mui/material/colors';
 import Select from '@mui/material/Select';
@@ -39,6 +35,15 @@ const ActionBar = (props) => {
 
     const { sortBy, filter, editModeTasks, pauseInput} = props;
     const dispatch = useDispatch();
+
+    const buttonTheme = createTheme({
+      palette: {
+        neutral: {
+          main: '#64748B',
+          contrastText: '#fff',
+        },
+      },
+    });
 
     const submitAddTask = () => {
         let task = {
@@ -69,7 +74,10 @@ const ActionBar = (props) => {
 
     const handlePauseInputChange = (duration) => dispatch(updatePauseInputAction(duration));
 
-    const handlePauseSelected = () => dispatch(handlePauseSelectedTask(pauseInput.duration));
+    const handlePauseSelected = () => {
+        dispatch(handlePauseSelectedTask(pauseInput.duration));
+        handleTogglePauseInput();
+    }
 
     const handleRemovePauseSelected = () => dispatch(handleRemoveSelectedPause());
     
@@ -91,102 +99,117 @@ const ActionBar = (props) => {
             spacing={0}
             sx={{ width: '95%'}}
         >
-            <Stack
-                direction='row'
-                justifyContent='space-between'
-                alignItems='center'
-                sx={{ width: '95%'}}
-            >
-                <Button
-                    variant='text'
-                    onClick={() => handleToggleFullEdit()}
-                >{editModeTasks ? 'Done' : 'Edit Tasks'}</Button>
-                <Search
-                    filter={filter}
-                    handleFilterChange={handleFilterChange}
-                    label='Search Task'
-                />
-                <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
-                    <InputLabel id="demo-select-small">SortBy</InputLabel>
-                    <Select
-                        id="sort-by-select"
-                        value={sortBy}
-                        label='SortBy'
-                        onChange={(event) => handleSortByChange(event.target.value)}
+            <ThemeProvider theme={buttonTheme}>
+                <Stack
+                    direction='row'
+                    justifyContent='space-between'
+                    alignItems='center'
+                    sx={{ width: '95%'}}
+                >
+                    <Button
+                        variant='contained'
+                        onClick={() => handleToggleFullEdit()}
+                    >{editModeTasks ? 'Done' : 'Edit Tasks'}</Button>
+                    <Search
+                        filter={filter}
+                        handleFilterChange={handleFilterChange}
+                        label='Search Task'
+                    />
+                    <FormControl sx={{ minWidth: 120 }} margin='normal' size='small'>
+                        <InputLabel id="demo-select-small">SortBy</InputLabel>
+                        <Select
+                            id="sort-by-select"
+                            value={sortBy}
+                            label='SortBy'
+                            onChange={(event) => handleSortByChange(event.target.value)}
+                        >
+                            {
+                                Object.values(SortByEnum).map(value => {
+                                    return (
+                                        <MenuItem key={value} value={value}>{value}</MenuItem>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </FormControl>
+                    <IconButton
+                        sx={{
+                            bgcolor: 'grey.300',
+                            '&:hover': {
+                                bgcolor: 'grey.200',
+                            },
+                        }}
+                        color='primary'
+                        onClick={() => submitAddTask()}
                     >
-                        {
-                            Object.values(SortByEnum).map(value => {
-                                return (
-                                    <MenuItem key={value} value={value}>{value}</MenuItem>
-                                )
-                            })
-                        }
-                    </Select>
-                </FormControl>
-                <IconButton onClick={() => submitAddTask()} aria-label="add">
-                    <AddCircleIcon />
-                </IconButton>
-            </Stack>
-            {
-                editModeTasks ?
-                (
-                    <Stack
-                        direction='row'
-                        justifyContent='flex-start'
-                        alignItems='center'
-                        spacing={2}
-                    >
-                        <Button
-                            variant='text'
-                            color='secondary'
-                            onClick={() => handleTogglePauseInput()}
-                        >Pause</Button>
-                        <Button
-                            variant='text'
-                            color='secondary'
-                            onClick={() => handleRemovePauseSelected()}
-                        >Reactivate</Button>
-                        <Button
-                            variant='text'
-                            color='secondary'
-                            onClick={() => handleRemoveSelected()}
-                        >Remove</Button>
-                    </Stack>
-                ) : ''
-            }
-            {
-                editModeTasks && pauseInput.show ?
-                (
-                    <Stack
-                        direction='row'
-                        justifyContent='flex-start'
-                        alignItems='center'
-                    >
-                        <FormControl sx={{ minWidth: 80 }} margin='normal'>
-                            <TextField
-                                id="pause"
-                                type="number"
-                                value={pauseInput.duration}
-                                onChange={(e) => handlePauseInputChange(e.target.value) }
-                                label="How many days?"
-                                variant="outlined"
-                                placeholder="Pause..."
-                                size="small"
-                            />
-                        </FormControl>
-                        <Button
-                            variant='text'
-                            color='secondary'
-                            onClick={() => handlePauseSelected()}
-                        >Save</Button>
-                        <Button
-                            variant='text'
-                            color='secondary'
-                            onClick={() => handleTogglePauseInput()}
-                        >Cancel</Button>
-                    </Stack>
-                ) : ''
-            }
+                        <AddIcon />
+                    </IconButton>
+                </Stack>
+                {
+                    editModeTasks ?
+                    (
+                        <Stack
+                            direction='row'
+                            justifyContent='flex-start'
+                            alignItems='center'
+                            spacing={2}
+                        >
+                            <Button
+                                variant='contained'
+                                color='neutral'
+                                onClick={() => handleTogglePauseInput()}
+                            >Pause</Button>
+                            <Button
+                                variant='contained'
+                                color='neutral'
+                                onClick={() => handleRemovePauseSelected()}
+                            >Reactivate</Button>
+                            <Button
+                                variant='contained'
+                                color='neutral'
+                                onClick={() => handleRemoveSelected()}
+                            >Remove</Button>
+                        </Stack>
+                    ) : ''
+                }
+                {
+                    editModeTasks && pauseInput.show ?
+                    (
+                        <Stack
+                            direction='row'
+                            justifyContent='flex-start'
+                            alignItems='center'
+                            spacing={1}
+                        >
+                            <FormControl margin='normal'>
+                                <TextField
+                                    sx={{
+                                        width: { sm: 100, md: 200 },
+                                    }}
+                                    id="pause"
+                                    type="number"
+                                    value={pauseInput.duration}
+                                    onChange={(e) => handlePauseInputChange(e.target.value) }
+                                    label="number days?"
+                                    variant="outlined"
+                                    placeholder="Pause..."
+                                    size="small"
+                                />
+                            </FormControl>
+                            <Button
+                                variant='contained'
+                                color='neutral'
+                                onClick={() => handlePauseSelected()}
+                            >Save</Button>
+                            <Button
+                                variant='contained'
+                                color='neutral'
+                                onClick={() => handleTogglePauseInput()}
+                            >Cancel</Button>
+                        </Stack>
+                    ) : ''
+                }
+            </ThemeProvider>
         </Stack>
     );
 }

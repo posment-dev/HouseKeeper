@@ -24,7 +24,7 @@ import {
 	toggleSelectTaskAction
 } from '../redux/store';
 import { useDispatch } from 'react-redux';
-import { calcProgress } from '../Constants/StaticFunctions';
+import { calcProgress, isPaused } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
@@ -65,6 +65,8 @@ const Task = (props) => {
     	return null
     }
 
+    const subText = isPaused(task) ? 'Paused for ' + task.pause[0].duration + ' days' : 'repeat interval (days): ' + task.days_repeat
+
 	return(
 		<Box
 	        sx={{
@@ -72,9 +74,6 @@ const Task = (props) => {
 	            bgcolor: 'grey.300',
 	            borderRadius: 2,
 	            border: '2px grey',
-	            '&:hover': {
-	                bgcolor: 'grey.400',
-	            },
 	        }}
 	    >
 	        <Grid container spacing={2}>
@@ -116,13 +115,13 @@ const Task = (props) => {
 											variant='outlined'
 											color='primary'
 		                />) : (<Typography variant='body2' component='div'>
-				                    repeat interval (days): {task.days_repeat}
+				                    {subText}
 				                </Typography>)
 	                }
 	            </Grid>
 	            <Grid item xs={5} container justifyContent='flex-end'>
 	                {
-	                	! editModeTasks ? (<IconButton onClick={() => resetTask()} aria-label="reset">
+	                	! editModeTasks && ! isPaused(task) ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />
 		                </IconButton>) : ''
 	            	}
