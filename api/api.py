@@ -114,6 +114,17 @@ def pause_task():
 
 def getAllTasks():
 	tasks = session.query(Task).all()
+	# Trigger Remove Pause when over
+	for t in tasks :
+		if len(t.pause) > 0 :
+			print('{} is paused'.format(t.name))
+			pause = t.pause[0]
+			pause_end = pause.starting + timedelta(days=pause.duration)
+			print('pause end date is {}'.format(pause_end))
+			if pause_end < datetime.utcnow() :
+				print('removing pause')
+				deletePauses([t.id])
+	tasks = session.query(Task).all()
 	return jsonify(Tasks=[i.serialize for i in tasks])
 
 def getTask(id):
