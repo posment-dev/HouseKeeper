@@ -254,6 +254,7 @@ export function handlePauseSelectedTask (duration, cb = () => {}) {
             if (task.isSelected === true) {
                 return task;
             }
+            return null;
         });
         let pauseMap = new Map();
         selected.forEach(t => {

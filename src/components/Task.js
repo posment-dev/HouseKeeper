@@ -4,7 +4,6 @@ import PropTypes from 'prop-types'
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
-import DeleteIcon from '@mui/icons-material/Delete';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
@@ -14,13 +13,11 @@ import SaveIcon from '@mui/icons-material/Save';
 import Checkbox from '@mui/material/Checkbox';
 
 import {
-	handleRemoveTask,
 	handleResetTask,
 	handleUpdateTask,
 	toggleEditModeAction,
 	updateTaskNameAction,
 	updateTaskDaysAction,
-	refreshSortTasksAction,
 	toggleSelectTaskAction
 } from '../redux/store';
 import { useDispatch } from 'react-redux';
@@ -28,13 +25,8 @@ import { calcProgress, isPaused } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
-
 	const { task, editModeTasks} = props;
     const dispatch = useDispatch();
-
-    const removeTask = () => {
-    	dispatch(handleRemoveTask(task));
-    }
 
     const resetTask = () => {
         dispatch(handleResetTask(task));

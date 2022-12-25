@@ -2,24 +2,10 @@ import React from 'react';
 
 import Task from './Task';
 import ActionBar from './ActionBar';
-import { handleAddTask, handleUpdateSort, handleUpdateFilter, refreshSortTasksAction } from '../redux/store';
-import { useDispatch } from 'react-redux';
-import { SortByEnum } from '../Constants/Enums'
 
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Grid from '@mui/material/Grid';
-//import IconButton from '@mui/material/IconButton';
-//import ReplayCircleFilledIcon from '@mui/icons-material/ReplayCircleFilled';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { grey } from '@mui/material/colors';
-import Select from '@mui/material/Select';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
 
 import PropTypes from 'prop-types';
 
