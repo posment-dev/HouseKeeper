@@ -94,7 +94,7 @@ const ActionBar = (props) => {
 
     return (
         <Stack
-            spacing={0}
+            spacing={1}
             sx={{ width: '95%'}}
         >
             <ThemeProvider theme={buttonTheme}>
@@ -152,7 +152,7 @@ const ActionBar = (props) => {
                             direction='row'
                             justifyContent='flex-start'
                             alignItems='center'
-                            spacing={2}
+                            spacing={1}
                         >
                             <Button
                                 variant='contained'

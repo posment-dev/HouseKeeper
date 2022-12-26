@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types'
 
-import Box from '@mui/material/Box';
-import Grid from '@mui/material/Grid';
+import Stack from '@mui/material/Stack';
 import IconButton from '@mui/material/IconButton';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import Typography from '@mui/material/Typography';
@@ -60,74 +59,82 @@ const Task = (props) => {
     const subText = isPaused(task) ? 'Paused for ' + task.pause[0].duration + ' days' : 'repeat interval (days): ' + task.days_repeat
 
 	return(
-		<Box
-	        sx={{
-	            width: '100%',
-	            bgcolor: 'grey.300',
-	            borderRadius: 2,
-	            border: '2px grey',
-	        }}
-	    >
-	        <Grid container spacing={2}>
+		<Stack direction='column'>
+			<Stack
+		        sx={{
+		            width: '100%',
+		            bgcolor: 'grey.300',
+		            borderRadius: 2,
+		            border: '2px grey',
+		        }}
+		        direction='row'
+		        justifyContent='space-between'
+	            alignItems='center'
+		    >
+		        
 	        	{
 	        		editModeTasks ? (
-		        		<Grid item xs='auto'>
-			        		<Checkbox
-			        			checked={task.isSelected}
-			        			onChange={() => handleChangeSelected()}
-			        			color='default'
-							/>
-			        	</Grid>
-			        	) : ''
+		        		<Checkbox
+		        			checked={task.isSelected}
+		        			onChange={() => handleChangeSelected()}
+		        			color='default'
+						/>	
+			        ) : ''
 	        	}
-	            <Grid item xs={6}>    
-	                {
-	                	task.editMode ? (<TextField
-								            label='Task Name'
-											onChange={(event) => handleChangeName(event.target.value)}
-											name='name'
-											type='text'
-											margin='normal'
-											defaultValue={task.name}
-											variant='outlined'
-											color='primary'
-						/>) : (<Typography variant='h7' component='div'>
-				                    {task.name}
-				                </Typography>
-				        )
-	                }
-	                {
-	                	task.editMode ? (<TextField
-								            label="repeat interval (days):"
-											onChange={(event) => handleChangeDays(event.target.value)}
-											name='interval'
-											type='number'
-											margin='normal'
-											defaultValue={task.days_repeat}
-											variant='outlined'
-											color='primary'
-		                />) : (<Typography variant='body2' component='div'>
-				                    {subText}
-				                </Typography>)
-	                }
-	            </Grid>
-	            <Grid item xs={2} container justifyContent='flex-end'>
-	                {
-	                	! editModeTasks && ! isPaused(task) ? (<IconButton onClick={() => resetTask()} aria-label="reset">
-		                    <CheckBoxIcon />
-		                </IconButton>) : ''
-	            	}
-	            	{
-	            		task.editMode && editModeTasks ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
-				                    <SaveIcon />
-				                </IconButton>
-	            		) : editModeTasks ? (<IconButton onClick={() => toggleEditMode()} aria-label="edit">
-			                    <EditIcon />
-			                </IconButton>
-	            		) : ''
-	            	}
-	            </Grid>
-	        </Grid>
+	            {
+	            	task.editMode ?
+	                (
+	                	<Stack direction='column'>	
+	                		<TextField
+					            label='Task Name'
+								onChange={(event) => handleChangeName(event.target.value)}
+								name='name'
+								type='text'
+								margin='normal'
+								defaultValue={task.name}
+								variant='outlined'
+								color='primary'
+							/>
+							<TextField
+					            label="repeat interval (days):"
+								onChange={(event) => handleChangeDays(event.target.value)}
+								name='interval'
+								type='number'
+								margin='normal'
+								defaultValue={task.days_repeat}
+								variant='outlined'
+								color='primary'
+	        				/>
+	        			</Stack>
+	    			)
+					: 
+					(
+						<Stack direction='column' sx={{ml: editModeTasks ? 0 : 4}}>
+							<Typography variant='h7' component='div'>
+								{task.name}
+							</Typography>
+							<Typography variant='body2' component='div'>
+								{subText}
+							</Typography>
+						</Stack>
+					)
+				}
+				{
+					! editModeTasks && ! isPaused(task) ? (<IconButton onClick={() => resetTask()} aria-label="reset">
+						<CheckBoxIcon />
+					</IconButton>) : ''
+				}
+				{
+					task.editMode && editModeTasks ? (<IconButton onClick={() => handleSaveTask()} aria-label="save">
+							<SaveIcon />
+						</IconButton>
+					) : editModeTasks ? 
+						(<IconButton onClick={() => toggleEditMode()} aria-label="edit">
+							<EditIcon />
+						</IconButton>
+					) : ''
+				}
+			</Stack>
 	        <LinearProgress
 	            key={task.id}
 	            color={calcProgress(task) < 85 ? 'primary' : 'secondary'}
@@ -145,14 +152,14 @@ const Task = (props) => {
 	            variant='determinate'
 	            value={calcProgress(task)}
 	        />
-	    </Box>
+	    </Stack>
 	)
 
 }
 
 Task.propTypes = {
 	task: PropTypes.object,
-	loading: PropTypes.bool
+	editModeTasks: PropTypes.bool
 };
 
 export default Task;
