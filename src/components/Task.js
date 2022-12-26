@@ -111,7 +111,7 @@ const Task = (props) => {
 				                </Typography>)
 	                }
 	            </Grid>
-	            <Grid item xs={5} container justifyContent='flex-end'>
+	            <Grid item xs={2} container justifyContent='flex-end'>
 	                {
 	                	! editModeTasks && ! isPaused(task) ? (<IconButton onClick={() => resetTask()} aria-label="reset">
 		                    <CheckBoxIcon />

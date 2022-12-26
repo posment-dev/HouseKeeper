@@ -103,11 +103,12 @@ const ActionBar = (props) => {
                     justifyContent='space-between'
                     alignItems='center'
                     sx={{ width: '95%'}}
+                    spacing={1}
                 >
                     <Button
                         variant='contained'
                         onClick={() => handleToggleFullEdit()}
-                    >{editModeTasks ? 'Done' : 'Edit Tasks'}</Button>
+                    >{editModeTasks ? 'Done' : 'Edit'}</Button>
                     <Search
                         filter={filter}
                         handleFilterChange={handleFilterChange}
@@ -138,6 +139,7 @@ const ActionBar = (props) => {
                             },
                         }}
                         color='primary'
+                        size='small'
                         onClick={() => submitAddTask()}
                     >
                         <AddIcon />
