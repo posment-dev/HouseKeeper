@@ -36,3 +36,14 @@ export const isPaused = (task) => {
         }
         return false;
 }
+
+export const calcPauseRestDays = (pause) => {
+        const now = new Date();
+        const pauseStart = new Date(pause.starting);
+        const pauseEnd = pauseStart.addDays(pause.duration);
+        if (pauseEnd < now) {
+                return 0;
+        }
+        const restDays = ( pauseEnd.getTime() - now.getTime() ) / (1000 * 3600 * 24);
+        return restDays.toFixed(0);
+}

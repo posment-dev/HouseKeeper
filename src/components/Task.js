@@ -20,7 +20,7 @@ import {
 	toggleSelectTaskAction
 } from '../redux/store';
 import { useDispatch } from 'react-redux';
-import { calcProgress, isPaused } from '../Constants/StaticFunctions';
+import { calcProgress, isPaused, calcPauseRestDays } from '../Constants/StaticFunctions';
 
 const Task = (props) => {
 
@@ -56,7 +56,7 @@ const Task = (props) => {
     	return null
     }
 
-    const subText = isPaused(task) ? 'Paused for ' + task.pause[0].duration + ' days' : 'repeat interval (days): ' + task.days_repeat
+    const subText = isPaused(task) ? 'Paused for ' + calcPauseRestDays(task.pause[0]) + ' more days' : 'repeat interval (days): ' + task.days_repeat
 
 	return(
 		<Stack direction='column'>
