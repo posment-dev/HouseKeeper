@@ -1,6 +1,7 @@
 Date.prototype.addDays = function(days) {
     var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
+    const newDay = parseInt(days) + date.getDate();
+    date.setDate(newDay);
     return date;
 }
 
