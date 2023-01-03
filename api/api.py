@@ -75,8 +75,12 @@ def task(id):
 		print("Updating a task")
 		name = request.args.get('name', '')
 		days_repeat = request.args.get('days_repeat', '')
+		#sec = request.args.get('sec', '')
 		print(name)
 		print(days_repeat)
+		# if sec :
+		# 	int_sec = int(sec)
+		# 	return _corsify_actual_response(updateResetTask(id, int_sec))
 		return _corsify_actual_response(updateTask(id, name, days_repeat))
 	if request.method == 'DELETE':
 		return _corsify_actual_response(deleteTask(id))
@@ -205,7 +209,7 @@ def deletePauses(ids):
 			full_sec = timedelta(days=pause.duration).total_seconds()
 			start_now_sec = (datetime.utcnow() - pause.starting).seconds
 			#print('{} - {} - {} - {}'.format(pause.starting, datetime.utcnow(), start_now_sec, datetime.utcnow() - pause.starting))
-			seconds_add_last_reset = min(full_sec, start_now_sec)
+			seconds_add_last_reset = max(full_sec, start_now_sec)
 			updateResetTask(pause.taskId, seconds_add_last_reset)
 			session.delete(pause)
 		session.commit()
