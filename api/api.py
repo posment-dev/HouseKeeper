@@ -39,7 +39,7 @@ def handle_invalid_usage(error):
 @app.route('/api/v1/tasks', methods = ['GET', 'POST', 'DELETE', 'OPTIONS'])
 def tasks():
 	if request.method == 'OPTIONS':
-		return _build_cors_preflight_response('GET, PUT, DELETE, OPTIONS')
+		return _build_cors_preflight_response('GET, POST, DELETE, OPTIONS')
 	if request.method == 'GET':
 		return _corsify_actual_response(getAllTasks())
 	if request.method == 'POST':
