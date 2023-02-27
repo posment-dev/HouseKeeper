@@ -3,13 +3,12 @@ import PropTypes from 'prop-types';
 
 import BudgetDateFilter from './BudgetDateFilter';
 import BudgetTotals from './BudgetTotals';
-import BudgetEntries from './BudgetEntries';
 
 import Stack from '@mui/material/Stack';
 
-const BudgetTable = (props) => {
+const BudgetTotalsView = (props) => {
 
-  const { entries, dateRange, totals, selectedEntries} = props;
+  const { dateRange, totals} = props;
 
   return (
     <Stack direction='column' spacing={2} mt={2}>
@@ -19,13 +18,9 @@ const BudgetTable = (props) => {
       <BudgetTotals
         totals={totals}
       />
-      <BudgetEntries
-        entries={entries}
-        selectedEntries={selectedEntries}
-      />
     </Stack>
   );  
 
 }
 
-export default BudgetTable;
+export default BudgetTotalsView;
