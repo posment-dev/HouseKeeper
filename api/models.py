@@ -56,7 +56,7 @@ class BudgetEntry(BudgetBase):
     __tablename__ = 'budget_entries'
 
 
-    id = Column(BigInteger, primary_key = True)
+    id = Column(Integer, primary_key = True)
     value = Column(BigInteger, nullable = False)
     category = Column(Integer, nullable = False)
     date = Column(String(10), default=func.now())
