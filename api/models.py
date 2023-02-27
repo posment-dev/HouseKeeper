@@ -1,9 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
-from constants import DB_LOCATION
+from constants import DB_LOCATION, DB_BUDGET_LOCATION
 
 Base = declarative_base()
 
@@ -49,3 +49,46 @@ class Pause(Base):
 
 engine = create_engine(DB_LOCATION)
 Base.metadata.create_all(engine)
+
+BudgetBase = declarative_base()
+
+class BudgetEntry(BudgetBase):
+    __tablename__ = 'budget_entries'
+
+
+    id = Column(BigInteger, primary_key = True)
+    value = Column(BigInteger, nullable = False)
+    category = Column(Integer, nullable = False)
+    date = Column(String(10), default=func.now())
+    description = Column(String(80), nullable = False)
+    fileID = Column(String(30), nullable = True)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id': self.id,
+            'value': self.value,
+            'category': self.category,
+            'date': self.date,
+            'description': self.description,
+            'fileID': self.fileID
+        }
+
+class DefaultCategory(BudgetBase):
+    __tablename__ = 'default_category'
+
+
+    description = Column(String(80), primary_key = True)
+    category = Column(Integer, nullable = False)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'description': self.description,
+            'category': self.category
+        }
+
+budgetEngine = create_engine(DB_BUDGET_LOCATION)
+BudgetBase.metadata.create_all(budgetEngine)
