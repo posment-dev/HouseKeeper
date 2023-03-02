@@ -656,7 +656,7 @@ function getThisMonth() {
 function getLastMonth() {
     const date = new Date();
     var firstDay = new Date(date.getFullYear(), date.getMonth()-1, 1);
-    var lastDay = new Date(date.getFullYear(), date.getMonth()-1, 31);
+    var lastDay = new Date(date.getFullYear(), date.getMonth(), 0);
     return {
         from: dateToString(firstDay),
         to: dateToString(lastDay)

@@ -40,7 +40,6 @@ const BudgetEntries = (props) => {
   }
 
   const columns = [
-    { field: 'id', headerName: 'Id', width: 40 },
     { field: 'date', headerName: 'Date', minWidth: 120 },
     { field: 'category', headerName: 'Category', minWidth: 180 },
     {
@@ -54,6 +53,7 @@ const BudgetEntries = (props) => {
       },
     },
     { field: 'description', headerName: 'Description', minWidth: 480 },
+    { field: 'id', headerName: 'Id', width: 40 },
   ];
 
   return (
