@@ -18,6 +18,7 @@ import copy
 
 # Diet imports
 from constants import DB_DIET_LOCATION
+from models import DietEntry, DietBase
 
 # File Upload
 import os
@@ -39,10 +40,10 @@ budgetSession = DBBudgetSession()
 
 # Diet DB Engine
 dietEngine = create_engine(DB_DIET_LOCATION)
-BudgetBase.metadata.bind = dietEngine
+DietBase.metadata.bind = dietEngine
 
 DBDietSession = sessionmaker(bind=dietEngine)
-dietSession = DBBudgetSession()
+dietSession = DBDietSession()
 
 app = Flask(__name__)
 
@@ -555,37 +556,29 @@ def dietEntries():
 		return _corsify_actual_response(getAllDietEntries())
 	if request.method == 'POST':
 		if request.data :
-			print("Making a new taks")
+			print("Making a new DietEntry")
 			req_body = json.loads(request.data)
 			print(type(req_body))
-			name = req_body['name']
-			days_repeat = req_body['days_repeat']
-			print(name)
-			print(days_repeat)
-			return _corsify_actual_response(makeANewTask(name, days_repeat))
+			weight = req_body['weight']
+			circumference = req_body['circumference']
+			print(weight)
+			print(circumference)
+			return _corsify_actual_response(makeADietEntry(weight, circumference))
 		else:
 			raise InvalidUsage('No body found', status_code=400)
 	if request.method == 'DELETE':
-		print(request.data)
-		if request.data :
-			print("Deleting multiple Tasks")
-			ids = json.loads(request.data)
-			print("with ids: " + str(ids)[1:-1])
-			return _corsify_actual_response(deleteMultipleTasks(ids))
-		else:
-			raise InvalidUsage('No body found', status_code=400)
+		return 0
 
 
 def getAllDietEntries():
 	dietEntries = dietSession.query(DietEntry).all()
 	return jsonify(Entries=[i.serialize for i in dietEntries])
 	
-def makeADietEntry(entry):
-	dietEntry = DietEntry(entry)
-	session.add(dietEntry)
-	session.commit()
+def makeADietEntry(weight, circumference):
+	dietEntry = DietEntry(weight = weight, circumference = circumference)
+	dietSession.add(dietEntry)
+	dietSession.commit()
 	return jsonify(Entry=dietEntry.serialize)
-
 
 
 

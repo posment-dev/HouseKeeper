@@ -104,7 +104,7 @@ BudgetBase.metadata.create_all(budgetEngine)
 DietBase = declarative_base()
 
 class DietEntry(DietBase):
-    __tablename__ = 'budget_entries'
+    __tablename__ = 'diet_entries'
 
 
     id = Column(Integer, primary_key = True)
