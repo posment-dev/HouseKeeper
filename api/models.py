@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
-from constants import DB_LOCATION, DB_BUDGET_LOCATION
+from constants import DB_LOCATION, DB_BUDGET_LOCATION, DB_DIET_LOCATION
 
 Base = declarative_base()
 
@@ -50,6 +50,10 @@ class Pause(Base):
 engine = create_engine(DB_LOCATION)
 Base.metadata.create_all(engine)
 
+############################################################
+# Budget
+############################################################
+
 BudgetBase = declarative_base()
 
 class BudgetEntry(BudgetBase):
@@ -92,3 +96,41 @@ class DefaultCategory(BudgetBase):
 
 budgetEngine = create_engine(DB_BUDGET_LOCATION)
 BudgetBase.metadata.create_all(budgetEngine)
+
+############################################################
+# Diet
+############################################################
+
+DietBase = declarative_base()
+
+class DietEntry(DietBase):
+    __tablename__ = 'budget_entries'
+
+
+    id = Column(Integer, primary_key = True)
+    date = Column(String(10), default=func.now(), nullable = False)
+    weight = Column(Integer, nullable = True)
+    circumference = Column(Integer, nullable = True)
+    run_distance = Column(Integer, nullable = True)
+    walk_distance = Column(Integer, nullable = True)
+    first_food_time = Column(Integer, nullable = True)
+    last_food_time = Column(Integer, nullable = True)
+    sugar = Column(Integer, nullable = True)
+
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id': self.id,
+            'date': self.date,
+            'weight': self.weight,
+            'circumference': self.circumference,
+            'run_distance': self.run_distance,
+            'walk_distance': self.walk_distance,
+            'first_food_time': self.first_food_time,
+            'last_food_time': self.last_food_time,
+            'sugar': self.sugar,
+        }
+
+dietEngine = create_engine(DB_DIET_LOCATION)
+DietBase.metadata.create_all(dietEngine)
