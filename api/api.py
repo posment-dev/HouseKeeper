@@ -16,6 +16,9 @@ from models import BudgetBase, BudgetEntry, DefaultCategory
 from constants import DB_BUDGET_LOCATION
 import copy
 
+# Diet imports
+from constants import DB_DIET_LOCATION
+
 # File Upload
 import os
 
@@ -33,6 +36,13 @@ BudgetBase.metadata.bind = budgetEngine
 
 DBBudgetSession = sessionmaker(bind=budgetEngine)
 budgetSession = DBBudgetSession()
+
+# Diet DB Engine
+dietEngine = create_engine(DB_DIET_LOCATION)
+BudgetBase.metadata.bind = dietEngine
+
+DBDietSession = sessionmaker(bind=dietEngine)
+dietSession = DBBudgetSession()
 
 app = Flask(__name__)
 
@@ -248,7 +258,10 @@ def _build_cors_preflight_response(allowed_methods):
 	return response
 
 
+############################################################
 # BUDGET API
+############################################################
+
 
 @unique
 class Categories(Enum):
@@ -526,5 +539,53 @@ def stringifyCategoriesInEntries(entries):
 	for entry in copy_entries:
 		entry.category = str(Categories(entry.category))
 	return copy_entries
+
+
+
+############################################################
+# DIET API
+############################################################
+
+
+@app.route('/api/v1/diet/entries', methods = ['GET', 'POST', 'DELETE', 'OPTIONS'])
+def dietEntries():
+	if request.method == 'OPTIONS':
+		return _build_cors_preflight_response('GET, POST, DELETE, OPTIONS')
+	if request.method == 'GET':
+		return _corsify_actual_response(getAllDietEntries())
+	if request.method == 'POST':
+		if request.data :
+			print("Making a new taks")
+			req_body = json.loads(request.data)
+			print(type(req_body))
+			name = req_body['name']
+			days_repeat = req_body['days_repeat']
+			print(name)
+			print(days_repeat)
+			return _corsify_actual_response(makeANewTask(name, days_repeat))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
+	if request.method == 'DELETE':
+		print(request.data)
+		if request.data :
+			print("Deleting multiple Tasks")
+			ids = json.loads(request.data)
+			print("with ids: " + str(ids)[1:-1])
+			return _corsify_actual_response(deleteMultipleTasks(ids))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
+
+
+def getAllDietEntries():
+	dietEntries = dietSession.query(DietEntry).all()
+	return jsonify(Entries=[i.serialize for i in dietEntries])
+	
+def makeADietEntry(entry):
+	dietEntry = DietEntry(entry)
+	session.add(dietEntry)
+	session.commit()
+	return jsonify(Entry=dietEntry.serialize)
+
+
 
 
