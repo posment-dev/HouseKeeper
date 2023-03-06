@@ -559,26 +559,75 @@ def dietEntries():
 			print("Making a new DietEntry")
 			req_body = json.loads(request.data)
 			print(type(req_body))
-			weight = req_body['weight']
-			circumference = req_body['circumference']
-			print(weight)
-			print(circumference)
-			return _corsify_actual_response(makeADietEntry(weight, circumference))
+			entry = getDietEntryFromJsonDict(req_body)
+			return _corsify_actual_response(makeADietEntry(entry))
 		else:
 			raise InvalidUsage('No body found', status_code=400)
 	if request.method == 'DELETE':
 		return 0
+
+@app.route('/api/v1/diet/entries/<int:id>', methods = ['GET', 'PUT', 'DELETE', 'OPTIONS'])
+def dietEntry(id):
+	if request.method == 'OPTIONS':
+		return _build_cors_preflight_response('GET, PUT, DELETE, OPTIONS')
+	if request.method == 'GET':
+		return _corsify_actual_response(getDietEntry(id))
+	if request.method == 'PUT':
+		if request.data :
+			print("Updating a Diet Entry")
+			req_body = json.loads(request.data)
+			print(type(req_body))
+			entry = getDietEntryFromJsonDict(req_body)
+			return _corsify_actual_response(updateDietEntry(id, entry))
+		else:
+			raise InvalidUsage('No body found', status_code=400)
+	if request.method == 'DELETE':
+		return _corsify_actual_response(deleteDietEntry(id))
 
 
 def getAllDietEntries():
 	dietEntries = dietSession.query(DietEntry).all()
 	return jsonify(Entries=[i.serialize for i in dietEntries])
 	
-def makeADietEntry(weight, circumference):
-	dietEntry = DietEntry(weight = weight, circumference = circumference)
-	dietSession.add(dietEntry)
+def makeADietEntry(entry):
+	dietSession.add(entry)
 	dietSession.commit()
-	return jsonify(Entry=dietEntry.serialize)
+	return jsonify(Entry=entry.serialize)
 
+def getDietEntry(id):
+	entry = dietSession.query(DietEntry).filter_by(id = id).one()
+	print(entry)
+	return jsonify(entry=entry.serialize)
 
+def updateDietEntry(id, update):
+	entry = dietSession.query(DietEntry).filter_by(id = id).one()
+	entry.merge(update)
+	dietSession.add(entry)
+	dietSession.commit()
+	return jsonify("Updated a Entry with id %s" % id)
 
+def deleteDietEntry(id):
+	entry = dietSession.query(DietEntry).filter_by(id = id).one()
+	dietSession.delete(entry)
+	dietSession.commit()
+	return jsonify("Removed Entry with id %s" % id)
+
+def getDietEntryFromJsonDict(jDict):
+	entry = DietEntry()
+	if 'date' in jDict:
+		entry.date = jDict['date']
+	if 'weight' in jDict:
+		entry.weight = jDict['weight']
+	if 'circumference' in jDict:
+		entry.circumference = jDict['circumference']
+	if 'last_food_time' in jDict:
+		entry.last_food_time = jDict['last_food_time']
+	if 'first_food_time' in jDict:
+		entry.first_food_time = jDict['first_food_time']
+	if 'run_distance' in jDict:
+		entry.run_distance = jDict['run_distance']
+	if 'walk_distance' in jDict:
+		entry.walk_distance = jDict['walk_distance']
+	if 'sugar' in jDict:
+		entry.sugar = jDict['sugar']
+	return entry

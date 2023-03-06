@@ -132,5 +132,22 @@ class DietEntry(DietBase):
             'sugar': self.sugar,
         }
 
+    def merge(self, source):
+        if source.weight:
+            self.weight = source.weight
+        if source.circumference:
+            self.circumference = source.circumference
+        if source.run_distance:
+            self.run_distance = source.run_distance
+        if source.walk_distance:
+            self.walk_distance = source.walk_distance
+        if source.first_food_time:
+            self.first_food_time = source.first_food_time
+        if source.last_food_time:
+            self.last_food_time = source.last_food_time
+        if source.sugar:
+            self.sugar = source.sugar
+        
+
 dietEngine = create_engine(DB_DIET_LOCATION)
 DietBase.metadata.create_all(dietEngine)
