@@ -4,10 +4,11 @@ import axios from 'axios';
 import { SortByEnum } from '../Constants/Enums'
 import { calcProgress } from '../Constants/StaticFunctions';
 
-//const URL = 'http://127.0.0.1:5000/api/v1/'
-const URL = 'http://192.168.1.221:5000/api/v1/'
+const URL = 'http://127.0.0.1:5000/api/v1/'
+//const URL = 'http://192.168.1.221:5000/api/v1/'
 const TASKS_API_URL = URL + 'tasks'
 const BUDGET_API_URL = URL + 'budget'
+const DIET_API_URL = URL + 'diet'
 
 const SORTING_DEFAULT = SortByEnum.name
 
@@ -311,13 +312,15 @@ export function handleInitialData() {
     return async (dispatch) => {
         return Promise.all([
             axios.get(TASKS_API_URL),
-            axios.get(BUDGET_API_URL + '/categories')
+            axios.get(BUDGET_API_URL + '/categories'),
+            axios.get(DIET_API_URL + '/entries')
         ]).then((values) => {
             console.log(values);
             const Tasks = values[0].data.Tasks
             dispatch(setTasksAction(Tasks));
             dispatch(sortTaskListAction(SORTING_DEFAULT));
             dispatch(setAllCategoriesAction(values[1].data));
+            dispatch(setDietEntriesAction(values[2].data.Entries));
         })
     }
 }
@@ -613,7 +616,10 @@ function loading (state = true, action) {
     }
 }
 
-// Budget Table Tasks
+///////////////////////////////////////////////////////////////
+// Budget Table
+///////////////////////////////////////////////////////////////
+
 const SET_CATEGORY = 'SET_CATEGORY'
 const SET_DEFAULT_CATEGORY_BY_ENTRY = 'SET_DEFAULT_CATEGORY_BY_ENTRY'
 const SET_DATE_RANGE = 'SET_DATE_RANGE'
@@ -937,7 +943,6 @@ function totals (state = {}, action) {
     }
 }
 
-
 function dateRange (state = DATE_RANGE_DEFAULT, action) {
     switch (action.type) {
         case SET_DATE_RANGE :
@@ -947,6 +952,215 @@ function dateRange (state = DATE_RANGE_DEFAULT, action) {
             };
         case SET_DATE_RANGE_OBJECT :
             return action.dateRange;
+        default :
+            return state;
+    }
+}
+
+
+///////////////////////////////////////////////////////////////
+// Diet
+///////////////////////////////////////////////////////////////
+
+const ADD_DIET_ENTRY = 'ADD_DIET_ENTRY';
+const SET_DIET_ENTRIES = 'SET_DIET_ENTRIES';
+const UPDATE_DIET_ENTRY = 'UPDATE_DIET_ENTRY';
+const INITIALIZE_NEW_ENTRY = 'INITIALIZE_NEW_ENTRY';
+const SET_NEW_ENTRY = 'SET_NEW_ENTRY';
+const SET_NEW_ENTRY_DATE = 'SET_NEW_ENTRY_DATE';
+const SET_NEW_ENTRY_WEIGHT = 'SET_NEW_ENTRY_WEIGHT';
+const SET_NEW_ENTRY_CIRC = 'SET_NEW_ENTRY_CIRC';
+const SET_NEW_ENTRY_FIRST_FOOD = 'SET_NEW_ENTRY_FIRST_FOOD';
+const SET_NEW_ENTRY_LAST_FOOD = 'SET_NEW_ENTRY_LAST_FOOD';
+const SET_NEW_ENTRY_RUN = 'SET_NEW_ENTRY_RUN';
+const SET_NEW_ENTRY_WALK = 'SET_NEW_ENTRY_WALK';
+
+
+function setDietEntriesAction(entries) {
+    return {
+        type: SET_DIET_ENTRIES,
+        entries
+    }
+}
+
+function addDietEntryAction(entry) {
+    return {
+        type: ADD_DIET_ENTRY,
+        entry
+    }
+}
+
+function updateDietEntryAction(entry) {
+    return {
+        type: UPDATE_DIET_ENTRY,
+        entry
+    }   
+}
+
+export function handleAddDietEntry(entry, cb = () => {}) {
+    return (dispatch, getState) => {
+        let newId = 1;
+        if (getState().dietEntries.length > 0) {
+            newId = 1 + Math.max.apply(null, getState().dietEntries.map(t => t.id));
+        }
+        const newEntry = {
+            ...entry,
+            id: newId,
+        }
+        dispatch(addDietEntryAction(newEntry));
+        return axios.post(DIET_API_URL + '/entries', entry)
+        .then(() => cb() )
+        .catch((err) => {
+        console.log(err);
+        //dispatch(removeTaskAction(newId));
+        alert('Add new Diet Entry failed. Try again.');
+        })
+    }
+}
+
+export function handleUpdateDietEntry(entry, cb = () => {}) {
+    return async (dispatch) => {
+        dispatch(updateDietEntryAction(entry));
+        return axios.put(DIET_API_URL + '/entries/' + entry.id, entry)
+        .then(() => cb() )
+        .catch((err) => {
+            console.log(err);
+            dispatch(handleInitialData());
+            alert('Updating Diet Entry failed. Try again.');
+        })
+    }
+}
+
+export function setNewEntryAction(entry) {
+    return {
+        type: SET_NEW_ENTRY,
+        entry
+    }
+}
+
+export function initializeNewEntryAction() {
+    return {
+        type: INITIALIZE_NEW_ENTRY
+    }
+}
+
+export function setNewEntryDate (date) {
+    return {
+        type: SET_NEW_ENTRY_DATE,
+        date
+    }
+}
+
+export function setNewEntryWeight (weight) {
+    return {
+        type: SET_NEW_ENTRY_WEIGHT,
+        weight
+    }
+}
+
+export function setNewEntryCirc (circ) {
+    return {
+        type: SET_NEW_ENTRY_CIRC,
+        circ
+    }
+}
+
+export function setNewEntryFirstFood (firstFood) {
+    return {
+        type: SET_NEW_ENTRY_FIRST_FOOD,
+        firstFood
+    }
+}
+
+export function setNewEntryLastFood (lastFood) {
+    return {
+        type: SET_NEW_ENTRY_LAST_FOOD,
+        lastFood
+    }
+}
+
+export function setNewEntryRunDist (run) {
+    return {
+        type: SET_NEW_ENTRY_RUN,
+        run
+    }
+}
+
+export function setNewEntryWalkDist (walk) {
+    return {
+        type: SET_NEW_ENTRY_WALK,
+        walk
+    }
+}
+
+function dateToStringCentralEurope(date) {
+    return dateFormat(date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear());
+}
+
+// reducers
+function newEntry (state = {}, action) {
+    switch(action.type) {
+        case SET_NEW_ENTRY :
+            return action.entry
+        case INITIALIZE_NEW_ENTRY :
+            const today = dateToStringCentralEurope(new Date());
+            return {
+                date: today
+            }
+        case SET_NEW_ENTRY_DATE : 
+            return {
+                    ...state,
+                    date: action.date
+                };
+        case SET_NEW_ENTRY_WEIGHT : 
+            return {
+                    ...state,
+                    weight: action.weight
+                };
+        case SET_NEW_ENTRY_CIRC : 
+            return {
+                    ...state,
+                    circumference: action.circ
+                };
+        case SET_NEW_ENTRY_FIRST_FOOD : 
+            return {
+                    ...state,
+                    first_food_time: action.firstFood
+                };
+        case SET_NEW_ENTRY_LAST_FOOD : 
+            return {
+                    ...state,
+                    last_food_time: action.lastFood
+                };
+        case SET_NEW_ENTRY_RUN : 
+            return {
+                    ...state,
+                    run_distance: action.run
+                };
+        case SET_NEW_ENTRY_WALK : 
+            return {
+                    ...state,
+                    walk_distance: action.walk
+                };
+        default :
+            return state;
+    }
+}
+
+function dietEntries (state = [], action) {
+    switch(action.type) {
+        case ADD_DIET_ENTRY :
+            return state.concat(action.entry);
+        case SET_DIET_ENTRIES :
+            return action.entries;
+        case UPDATE_DIET_ENTRY :
+            return state.map((de) => {
+            if (de.id !== action.entry.id) {
+                return de;
+            }
+            return {
+                ...action.entry,
+            }});
         default :
             return state;
     }
@@ -980,6 +1194,8 @@ const store = createStore(combineReducers({
     dateRange,
     selectedEntries,
     loading,
+    newEntry,
+    dietEntries,
 }), applyMiddleware(thunk, checker, logger))
 
 export default store;

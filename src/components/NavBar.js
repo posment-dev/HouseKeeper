@@ -77,6 +77,7 @@ const NavBar = (props) => {
                 </MenuItem>
               </Menu>
             </div>
+            <Button href='/diet' color='inherit'>Mirkos Diet</Button>
           </Toolbar>
         </AppBar>
       </Box>

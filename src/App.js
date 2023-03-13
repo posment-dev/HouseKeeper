@@ -9,6 +9,8 @@ import SetDefaultCategory from './components/SetDefaultCategory';
 import BudgetFileUpload from './components/BudgetFileUpload';
 import BudgetTotalsView from './components/BudgetTotalsView';
 import BudgetEntriesView from './components/BudgetEntriesView';
+import DietDashboard from './diet/DietDashboard';
+import EntryForm from './diet/EntryForm';
 
 import { Route, Routes } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -50,6 +52,20 @@ function App() {
     dateRange: state.dateRange,
     selectedEntries: state.selectedEntries,
   }))(BudgetEntriesView)
+
+  const Diet = connect((state) => ({
+    dietEntries: state.dietEntries,
+  }))(DietDashboard)
+
+  const NewDietEntry = connect((state) => ({
+    newEntry: state.newEntry,
+    isUpdate: false,
+  }))(EntryForm)
+
+  const UpdateDietEntry = connect((state) => ({
+    newEntry: state.newEntry,
+    isUpdate: true,
+  }))(EntryForm)
 
   return (
     <div className="App">
@@ -98,6 +114,24 @@ function App() {
             exact path='/budget/fileupload'
             element={
               <BudgetFileUpload />
+            }
+          />
+          <Route 
+            exact path='/diet'
+            element={
+              <Diet />
+            }
+          />
+          <Route 
+            exact path='/diet/newEntry'
+            element={
+              <NewDietEntry />
+            }
+          />
+          <Route 
+            exact path='/diet/updateEntry'
+            element={
+              <UpdateDietEntry />
             }
           />
         </Routes>
