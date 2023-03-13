@@ -1094,7 +1094,18 @@ export function setNewEntryWalkDist (walk) {
 }
 
 function dateToStringCentralEurope(date) {
-    return dateFormat(date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear());
+    return dateFormatEurope(date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear());
+}
+
+function dateFormatEurope(stringDate) {
+    let splitted = stringDate.split('.');
+    if (splitted[1].length === 1) {
+        splitted[1] = '0' + splitted[1];
+    }
+    if (splitted[2].length === 1) {
+        splitted[2] = '0' + splitted[2];
+    }
+    return splitted[0] + '.' + splitted[1] + '.' + splitted[2]
 }
 
 // reducers
