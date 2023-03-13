@@ -4,8 +4,8 @@ import axios from 'axios';
 import { SortByEnum } from '../Constants/Enums'
 import { calcProgress } from '../Constants/StaticFunctions';
 
-const URL = 'http://127.0.0.1:5000/api/v1/'
-//const URL = 'http://192.168.1.221:5000/api/v1/'
+//const URL = 'http://127.0.0.1:5000/api/v1/'
+const URL = 'http://192.168.1.221:5000/api/v1/'
 const TASKS_API_URL = URL + 'tasks'
 const BUDGET_API_URL = URL + 'budget'
 const DIET_API_URL = URL + 'diet'
